@@ -1,0 +1,26 @@
+---
+title: "README"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R functions
+Bradford Condon
+University of Kentucky
+
+Last updated 7-28-16
+
+
+**bootStrapWithNoiseFromNorm**
+goal- to take a distance matrix, Standard deviation, and number of trees, and return the confidence interval trees for this SD via normal noising
+
+**bootStrapWithNoiseOverRange**
+
+**readAndCombineTrees**
+
+**treesToCladeCompare**
+
+**trimTreeToTree**
