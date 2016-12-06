@@ -207,6 +207,19 @@ trimTreeToTree<- function(treeToTrim, limitingTree) {
   finalTree <-treeToTrim
   return(finalTree) 
 }
+###Trim tree based on list of tips
+
+
+trimTreeFromList<- function(treeToTrim, listToDrop) {
+  unTrimTips = treeToTrim$tip
+  limTips <- listToDrop
+  tipsToDrop <- unTrimTips[!unTrimTips %in% limTips]
+  for (i in tipsToDrop){
+    treeToTrim =  drop.tip(treeToTrim, c(i, trim.internal = TRUE )) #delete tips as needed
+  }
+  finalTree <-treeToTrim
+  return(finalTree) 
+}
 #####Generate report (histogram, quantile cutoffs) for in/out clade distances
 #Not sure if this is working as intended
 #7-28-16
@@ -221,4 +234,120 @@ computeQuantiles <- function (treeDistanceData, cutOffNum, greaterThan = TRUE){
       x = floor(percentCutoff*totalNum/100)
     }
     return(x)
+}
+
+
+
+#calculate the average distance between groups given a distance matrix and a clade list
+#12-5-16
+
+withinGroupDistancesTwo <- function(distanceMatrix, clade_list){
+  require('dplyr')
+  #remove items from clade_list not in tree
+  clade_list<- filter(clade_list, Idcorrected %in% row.names(distanceMatrix))
+
+  idist = na.omit(melt(distanceMatrix))
+  colnames(idist) <- c("a", "b", "dist")
+  
+  allSelfDists = data.frame()
+  clade_loop <- unique(clade_list$hostGenus)
+  #loop through all clade self comparisons, add to DF
+  for (i in clade_loop){
+    #retrieve all genomes matching i as character
+    itaxa <- as.character(clade_list[which(clade_list$hostGenus == i),2])
+    if (length(itaxa > 1)){
+      for (a in itaxa) {     
+        intaxa =  itaxa[itaxa != a]    #remove variable from list
+        #retrieve values matching a
+        ataxa= idist[idist$a %in% a,]
+        #calculate in-distances
+        in_distancesa= ataxa[ataxa$b %in% intaxa, 3]
+        if(length(in_distancesa > 0)){
+        toAdd = cbind(as.numeric(in_distancesa), as.character(i), a)
+        }
+        
+        allSelfDists = rbind(allSelfDists, toAdd)
+      }
+      }
+    }
+  colnames(allSelfDists) <- c("distance", "clade")
+  allSelfDists$distance<- as.numeric(as.character(allSelfDists$distance))
+  return(allSelfDists)
+}
+
+
+
+
+
+
+
+#calculate the average distance between groups given a distance matrix and a clade list
+#8-15-16
+
+withinGroupDistances <- function(distanceMatrix, clade_list){
+idist = na.omit(melt(distanceMatrix))
+colnames(idist) <- c("a", "b", "dist")
+allSelfDists = data.frame()
+clade_loop <- unique(clade_list$hostGenus)
+#loop through all clade self comparisons, add to DF
+for (i in clade_loop){
+  #retrieve all genomes matching i as character
+  itaxa <- as.character(clade_list[which(clade_list$hostGenus == i),2])
+  if (length(itaxa < 2)){ #Skip this clade if theres 1 or 0 taxa.
+  }else{
+  for (a in itaxa) {     
+    intaxa =  itaxa[itaxa != a]    #remove variable from list
+    #retrieve values matching a
+    ataxa= idist[idist$a %in% a, ]
+    #calculate in-distances
+    in_distancesa= ataxa[ataxa$b %in% intaxa, 3] 
+    toAdd = cbind(as.numeric(in_distancesa), as.character(i))
+    allSelfDists = rbind(allSelfDists, toAdd)
+  }
+  }
+}
+colnames(allSelfDists) <- c("distance", "clade")
+allSelfDists$distance<- as.numeric(as.character(allSelfDists$distance))
+return(allSelfDists)
+
+}
+
+
+###
+#12-2-16
+#Function to write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
+#returns bootstrap trees
+###
+
+bootstrapFromNormInCladeOnly<- function(startingTree, clade_list, withinSDtable, ntrees = 1000  ){
+master<-startingTree
+bstrees = vector("list", 0)  #create blank object to put noised trees in
+class(bstrees) <- "multiPhylo"
+loop = c(1:ntrees)  #number of trees and intervals to make
+for (i in loop) {  
+  x <- master #reset matrix
+  for (a in as.character(clade_list$Idcorrected)) {
+    #lookup this clade
+    thisClade <-  as.character(unlist(clade_list %>% filter(Idcorrected == as.character(a)) %>% select (hostGenus )))
+    #determine SD to noise from
+    thisSD <- withinSDtable %>% filter(clade == thisClade) %>% select (sd)
+    #get all taxa in this clade excluding itself
+    matchingTaxa <- as.list(clade_list %>% filter(hostGenus == thisClade) %>% select (Idcorrected) %>% filter(Idcorrected != as.character(a)))
+    for (b in matchingTaxa$Idcorrected){  
+      sublista <- idist[which(idist$a == a  ) ,]
+      sublist <- sublista[which((sublista$b) == b ),]  #retrieve the distance between these two strains
+      thisDist = as.numeric(sublist[,3]) 
+      newVal = (thisDist + rnorm(1, mean = 0, sd = as.numeric(thisSD)))   #randomly sample 1 value from rnorm of this SD
+      x[b,a] <-  newVal
+      x[a,b] <- newVal
+    }
+  }   
+  x <- abs(x)  #Convert negative to positive
+  treex<-  nj(as.dist(x))
+  treex$edge.length[treex$edge.length <0] <- abs(treex$edge.length[treex$edge.length<0]) 
+  bstrees[[i]] <- treex 
+  message = paste("finished with tree number" , i)
+  print(message)
+}
+return(bstrees)
 }
