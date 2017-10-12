@@ -23,7 +23,7 @@ library('knitr')
 library('dplyr')
 library('reshape')
 source('../R/AuxFunctions.R')
-source('../R/CondonPhyloFunctions.R')
+source('../R/distance_trees.R')
 
 ```
 
@@ -83,37 +83,9 @@ Next, we want to noise the tree based on this distance file.
 ###
 #Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
 ###
+generate_bootstrap_trees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, clade_assignments = clade_assignments, ID_names = ID_names)
 
-bstrees = vector("list", 0)  #create blank object to put noised trees in
-class(bstrees) <- "multiPhylo"
-loop = c(1:1000)  #number of trees and intervals to make
-for (i in loop) {  
-  x <- myData #reset matrix
-  for (a in as.character(clade_list$ID)) {
-    #lookup this clade
-  thisClade <-  as.character(unlist(clade_list %>% filter(ID == as.character(a)) %>% select (clades )))
-        #determine SD to noise from
-      thisSD <- withinSDtable %>% filter(clade == thisClade) %>% select (sd)
-   #get all taxa in this clade excluding itself
-   matchingTaxa <- as.list(clade_list %>% filter(clades == thisClade) %>% select (ID) %>% filter(ID != as.character(a)))
-   
-    for (b in matchingTaxa$ID){  
-      sublista <- idist[which(idist$a == a  ) ,]
-      sublist <- sublista[which((sublista$b) == b ),]  #retrieve the distance between these two strains
-      thisDist = as.numeric(sublist[,3]) 
-      newVal = (thisDist + rnorm(1, mean = 0, sd = as.numeric(thisSD)))   #randomly sample 1 value from rnorm of this SD
-      x[b,a] <-  newVal
-      x[a,b] <- newVal
-    }
-  }   
-  x <- abs(x)  #Convert negative to positive
-  treex<-  nj(as.dist(x))
-  treex$edge.length[treex$edge.length <0] <- abs(treex$edge.length[treex$edge.length<0]) 
-  bstrees[[i]] <- treex 
-  message = paste("finished with tree number" , i)
-  print(message)
-}
-//write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
+##write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
 
 ```
 
