@@ -19,7 +19,3 @@ Output is a multiPhylo object.
 \description{
 Collates a folder of tree files into a single multiPhylo tree object.
 }
-\examples{
-readAndCombineTrees(c(/usr/local/files/trees), c(unicorns), c(hamsters) )
-
-}

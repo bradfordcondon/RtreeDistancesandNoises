@@ -8,8 +8,6 @@ library(distory)
 #' @param pathToTrees The path to your trees folder.
 #' @param taxaToExclude Any taxa you would like excluded from the tree.  Useful to enforce conformity.
 #' @param taxonToRoot Taxon to root all trees at.
-#' @examples
-#' readAndCombineTrees(c(/usr/local/files/trees), c(unicorns), c(hamsters) )
 #'
 #' @return Output is a multiPhylo object.
 #'
@@ -138,7 +136,7 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
         allTreesData = rbind(allTreesData, toadd)
         simpleTreesData = rbind(simpleTreesData, simpleadd)
     }  #finish looping through trees
-    
+
     simpleTreesData = cbind(simpleTreesData, inPRank = rank(simpleTreesData$in_avg)/length(simpleTreesData$in_avg) * 100, outPRank = rank(simpleTreesData$out_avg)/length(simpleTreesData$out_avg) * 100)
     if (is.null(referenceTree) == FALSE) {
         colnames(refDistTracker) = c("distance", "treeName")
@@ -164,7 +162,7 @@ analyzeTips <- function(multiPhyloObject) {
             if (thisTip %in% tipLabelCounter[, 1]) {
                 # if the column does exist, add +1.
                 tipLabelCounter[tipLabelCounter$tip == thisTip, 2] <- as.numeric(tipLabelCounter[tipLabelCounter$tip == thisTip, 2]) + 1
-                
+
             } else {
                 # if it doesnt, create it, set it to 1
                 toAddtwo <- cbind(tip = thisTip, count = 1, stringsAsFactors = FALSE)
@@ -211,7 +209,7 @@ treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", 
         out_tracker = character()
         clade_means = data.frame()
         treeKeys = data.frame()
-        
+
         if (is.null(referenceTree) == FALSE) {
             compare[[2]] <- itree  #put this tree in our comparison slot
             distance = c(distance = as.character(dist.multiPhylo(compare, method = refCompareMethod)), treename = as.character(names(multiPhyloTrees[b])))
@@ -238,10 +236,10 @@ treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", 
                     outKeyDists = mean(idist[a, otherKeys])
                     treeKeys <- rbind(cbind(inKeyDists, outKeyDists))
                   }
-                  
+
                 }
             }
-            
+
             # now, store the average in and out distances for this particular clade
             clade_data = data.frame(avg_in = mean(as.numeric(clade_in)), avg_out = mean(as.numeric(clade_out)), clade = i, check.names = FALSE)
             clade_means = rbind(clade_means, clade_data)
@@ -259,9 +257,9 @@ treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", 
             keyCladesOutput = rbind(keyCladesOutput, addKey)
         }
     }  #finish looping through trees
-    
+
     simpleTreesData = cbind(simpleTreesData, inPRank = rank(simpleTreesData$in_avg)/length(simpleTreesData$in_avg) * 100, outPRank = rank(simpleTreesData$out_avg)/length(simpleTreesData$out_avg) * 100)
-    
+
     if (is.null(referenceTree) == FALSE) {
         colnames(refDistTracker) = c("distance", "treeName")
         myOutput <- list(cladeByCladeData = allTreesData, treeByTreeSummary = simpleTreesData, distanceToReferenceTree = refDistTracker)
@@ -278,31 +276,31 @@ treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", 
 # combine ggplots credits to stack overflow
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
     library(grid)
-    
+
     # Make a list from the ... arguments and plotlist
     plots <- c(list(...), plotlist)
-    
+
     numPlots = length(plots)
-    
+
     # If layout is NULL, then use 'cols' to determine layout
     if (is.null(layout)) {
         # Make the panel ncol: Number of columns of plots nrow: Number of rows needed, calculated from # of cols
         layout <- matrix(seq(1, cols * ceiling(numPlots/cols)), ncol = cols, nrow = ceiling(numPlots/cols))
     }
-    
+
     if (numPlots == 1) {
         print(plots[[1]])
-        
+
     } else {
         # Set up the page
         grid.newpage()
         pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-        
+
         # Make each plot, in the correct location
         for (i in 1:numPlots) {
             # Get the i,j matrix positions of the regions that contain this subplot
             matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-            
+
             print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row, layout.pos.col = matchidx$col))
         }
     }
