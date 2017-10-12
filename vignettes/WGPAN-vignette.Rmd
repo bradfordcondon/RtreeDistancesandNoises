@@ -55,9 +55,13 @@ colnames(idist) <- c("a", "b", "dist")
 allSelfDists = data.frame()
 clade_loop <- unique(clade_list$clades)
 
-#TO DO: Below method is much better if handed a list of clades as opposed to a DF that looks for a column ID.
+#remove items from clade_list not in tree
+  clade_list<- filter(clade_list, ID %in% row.names(distanceMatrix))
+  
+ID_names <- clade_list$ID
+clade_assignments <-clade_list$clades
 
-WithinDistanceTable <- withinGroupDistancesThree(distanceMatrix = x, clade_list = clade_list)
+WithinDistanceTable <- withinGroupDistancesThree(distanceMatrix = x, clade_assignments = clade_assignments, ID_names = ID_names)
 boxplot(distance ~ clade, data = WithinDistanceTable, las=3 , main = "within-clade distances 1-11-17", ylab = "SNPs/MB" )
 withinSDtable<- WithinDistanceTable %>% group_by(clade)%>%summarize(sd = sd(distance), mean = mean(distance))
 
