@@ -8,7 +8,9 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = TRUE)
+```
 
 ## Introduction
 
@@ -30,9 +32,9 @@ source('../R/CondonPhyloFunctions.R')
 
 Note that the matrix **MUST** be identical across the diagonal for the distance calculation to work.
 
-```{r readInData, }
+```{r readInData}
 ID <- c("Amanita","Polyporus","Coprinus", "Daldinia", "Entoloma", "Flaviporus")
-myData<- matrix(sample(100:10000, 36), nrow = 6, ncol = 6,  dimnames = list(taxa, taxa)) 
+myData<- matrix(sample(100:10000, 36), nrow = 6, ncol = 6,  dimnames = list(ID, ID)) 
 diag(myData)<- 0 #set diagonal to 0
 
 ```
@@ -56,21 +58,19 @@ allSelfDists = data.frame()
 clade_loop <- unique(clade_list$clades)
 
 #remove items from clade_list not in tree
-  clade_list<- filter(clade_list, ID %in% row.names(distanceMatrix))
+  clade_list<- filter(clade_list, ID %in% row.names(myData))
   
 ID_names <- clade_list$ID
 clade_assignments <-clade_list$clades
 
 WithinDistanceTable <- withinGroupDistancesThree(distanceMatrix = x, clade_assignments = clade_assignments, ID_names = ID_names)
+
 boxplot(distance ~ clade, data = WithinDistanceTable, las=3 , main = "within-clade distances 1-11-17", ylab = "SNPs/MB" )
 withinSDtable<- WithinDistanceTable %>% group_by(clade)%>%summarize(sd = sd(distance), mean = mean(distance))
 
 kable(withinSDtable)
 #replace NA with 0
 withinSDtable[is.na(withinSDtable)]<- 0
-
-write.table(withinSDtable, file = paste(outputFolder, "withinSDTable_1-11-16.txt", sep=""))
-
 
 ```
 
@@ -80,7 +80,6 @@ write.table(withinSDtable, file = paste(outputFolder, "withinSDTable_1-11-16.txt
 Next, we want to noise the tree based on this distance file.
 
 ```{r, noiseTree, eval=FALSE}
-
 ###
 #Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
 ###
@@ -89,16 +88,16 @@ bstrees = vector("list", 0)  #create blank object to put noised trees in
 class(bstrees) <- "multiPhylo"
 loop = c(1:1000)  #number of trees and intervals to make
 for (i in loop) {  
-  x <- myDataTrim #reset matrix
-  for (a in as.character(clade_list$Idcorrected)) {
+  x <- myData #reset matrix
+  for (a in as.character(clade_list$ID)) {
     #lookup this clade
-  thisClade <-  as.character(unlist(clade_list %>% filter(Idcorrected == as.character(a)) %>% select (WG_clade )))
+  thisClade <-  as.character(unlist(clade_list %>% filter(ID == as.character(a)) %>% select (clades )))
         #determine SD to noise from
       thisSD <- withinSDtable %>% filter(clade == thisClade) %>% select (sd)
    #get all taxa in this clade excluding itself
-   matchingTaxa <- as.list(clade_list %>% filter(WG_clade == thisClade) %>% select (Idcorrected) %>% filter(Idcorrected != as.character(a)))
+   matchingTaxa <- as.list(clade_list %>% filter(clades == thisClade) %>% select (ID) %>% filter(ID != as.character(a)))
    
-    for (b in matchingTaxa$Idcorrected){  
+    for (b in matchingTaxa$ID){  
       sublista <- idist[which(idist$a == a  ) ,]
       sublist <- sublista[which((sublista$b) == b ),]  #retrieve the distance between these two strains
       thisDist = as.numeric(sublist[,3]) 
@@ -114,7 +113,7 @@ for (i in loop) {
   message = paste("finished with tree number" , i)
   print(message)
 }
-write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
+//write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
 
 ```
 
@@ -131,7 +130,7 @@ numbers of bipartitions (or splits); if TRUE, the number of clades (of hopefully
 
 
 
-```{r, }
+```{r, eval=FALSE}
 #read in bootstrap trees
 bstrees<- read.nexus(paste(outputFolder,"", sep = "bootstrapTreesV5__5-21-16.nexus"))
 master <- myDataTrim

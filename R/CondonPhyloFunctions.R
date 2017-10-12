@@ -235,16 +235,17 @@ computeQuantiles <- function(treeDistanceData, cutOffNum, greaterThan = TRUE) {
 
 withinGroupDistancesThree <- function(distanceMatrix, clade_assignments, ID_names){
   require('dplyr')
+  clade_list = data.frame(ID_names, clade_assignments)
 
   idist = na.omit(melt(distanceMatrix))
-  colnames(idist) <- c("a", "b", "dist")
+  colnames(idist) <- c("a", "b", "dist") #break matrix down into sets of pairwise distances between taxon a & b where dist = dist.
 
   allSelfDists = data.frame()
-  clade_loop <- unique(clade_list$clades)
+  clade_loop <- unique(clade_assignments)
   #loop through all clade self comparisons, add to DF
   for (i in clade_loop){
     #retrieve all genomes matching i as character
-    itaxa <- as.character(clade_list[which(clade_list$clades == i),1]) # this is highly problematic
+    itaxa <- as.character(clade_list[which(clade_list$clade_assignments == i),1]) # this is highly problematic
     if (length(itaxa > 1)){
       for (a in itaxa) {
         intaxa =  itaxa[itaxa != a]    #remove variable from list
