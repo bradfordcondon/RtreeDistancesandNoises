@@ -4,18 +4,18 @@ Version: 0.0.0.9000
 Authors@R: person("Bradford", "Condon", email = "bradford.condon@gmail.com", role = c("aut", "cre"))
 Description: This package deals with pairwise distance matrices created by pairwise whole-genome alignment.  Because traditional bootstrapping methods do not work for trees created via this method, this package employs an alternative method to assign confidence values to tree nodes.
 Depends: R (>= 3.2.4)
-Imports: 
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 Imports: 
-    dplyr
-    ape
-    phytools
-    distory
-    grid
+  dplyr,
+  ape,
+  phytools,
+  distory,
+  reshape,
+  grid
 Suggests: 
-    knitr,
-    rmarkdown
+  knitr,
+  rmarkdown
 VignetteBuilder: knitr
