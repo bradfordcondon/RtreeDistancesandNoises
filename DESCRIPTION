@@ -1,10 +1,14 @@
 Package: WGPAN
 Title: Whole Genome Pair-Wise Alignment Noiser
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Authors@R: person("Bradford", "Condon", email = "bradford.condon@gmail.com", role = c("aut", "cre"))
 Description: This package deals with pairwise distance matrices created by pairwise whole-genome alignment.  Because traditional bootstrapping methods do not work for trees created via this method, this package employs an alternative method to assign confidence values to tree nodes.
 Depends: R (>= 3.2.4)
 Imports: 
-License: 
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

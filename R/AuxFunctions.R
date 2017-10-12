@@ -4,6 +4,18 @@ library(distory)
 
 ## readAndCombineTrees imports directory of tree files, trims and roots as necessary, returns
 ## multiphylo object
+#' Collates a folder of tree files into a single multiPhylo tree object.
+#'
+#' @param pathToTrees The path to your trees folder.
+#' @param taxaToExclude Any taxa you would like excluded from the tree.  Useful to enforce conformity.
+#' @param taxonToRoot Taxon to root all trees at.
+#' @examples
+#' readAndCombineTrees(c(/usr/local/files/trees), c(unicorns), c(hamsters) )
+#'
+#' @return Output is a multiPhylo object.
+#' 
+#'
+
 readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot = NULL) {
     file_list <- list.files(path = pathToTrees)  # List files to import.
     allMyTrees = vector("list", 2)
@@ -36,6 +48,14 @@ readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot =
 # clade assignments output: A list of two (or three) dataframes.  The first documenting each
 # clade's average in and out distances for each tree.  The second is a simplified, average
 # in/out score for each tree.
+#' @param multiPhyloTrees Your tree object from readAndCombineTrees.
+#' @param cladeListFile A list of clades that your taxa belong to.
+#' @param referenceTree A reference Tree.
+#' @param refCompareMethod A comparison method for the reference tree.
+#'
+#' 
+#'
+
 treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, 
     refCompareMethod = "edgeset") {
     clade_list <- read.table(file = cladeListFile, header = FALSE)
