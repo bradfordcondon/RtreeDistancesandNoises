@@ -2,7 +2,7 @@
 % Please edit documentation in R/AuxFunctions.R
 \name{readAndCombineTrees}
 \alias{readAndCombineTrees}
-\title{Collates a folder of tree files into a single multiPhylo tree Object}
+\title{Collates a folder of tree files into a single multiPhylo tree object.}
 \usage{
 readAndCombineTrees(pathToTrees, taxaToExclude = NULL, taxonToRoot = NULL)
 }
@@ -13,9 +13,13 @@ readAndCombineTrees(pathToTrees, taxaToExclude = NULL, taxonToRoot = NULL)
 
 \item{taxonToRoot}{Taxon to root all trees at.}
 }
+\value{
+Output is a multiPhylo object.
+}
 \description{
-Collates a folder of tree files into a single multiPhylo tree Object
+Collates a folder of tree files into a single multiPhylo tree object.
 }
 \examples{
 readAndCombineTrees(c(/usr/local/files/trees), c(unicorns), c(hamsters) )
+
 }
