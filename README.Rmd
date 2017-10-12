@@ -1,14 +1,10 @@
-## R functions
-Bradford Condon
+# WGPAN Whole-Genome Pairwise Alignment Noising
+written by Bradford Condon
 University of Kentucky
 
+Special thanks to Hadley Wickham for writing [a fantastsic guide to distributing R packages](http://r-pkgs.had.co.nz/intro.html).
 
-Note: this module is currently under development, converting it from scripts to a simple standalone package.
-
-
-### General coding practices
-
-This package uses`formatR::tidy_dir("R")` to format code `lintr::lint_package()`.
+Note: this module is currently under development, converting it from scripts to a simple standalone package.   This package uses`formatR::tidy_dir("R")` to format code.
 
 
 
