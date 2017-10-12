@@ -15,3 +15,10 @@ goal- to take a distance matrix, Standard deviation, and number of trees, and re
 **treesToCladeCompare**
 
 **trimTreeToTree**
+
+
+
+### General coding practices
+
+This package uses`formatR::tidy_dir("R")` to format code `lintr::lint_package()`.
+
