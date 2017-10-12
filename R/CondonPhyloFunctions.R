@@ -7,7 +7,7 @@ require(distory)
 ## bootstrap trees for this SD via normal noising
 bootStrapWithNoiseFromNorm <- function(originalMatrix, standardDev, numTrees = 1000, rootTree = NULL) {
     print("warning: rooting is not currently supported")
-    bstrees = vector("list", 0)  #create blank object to put noised trees 
+    bstrees = vector("list", 0)  #create blank object to put noised trees
     class(bstrees) <- "multiPhylo"
     loop = c(1:numTrees)  #number of trees and intervals to make
     for (i in loop) {
@@ -33,21 +33,21 @@ bootStrapWithNoiseFromNorm <- function(originalMatrix, standardDev, numTrees = 1
     }
     return(bstrees)
 }
-#### 
+####
 
 ## written 7-24-16 Goal: To take a range of SDs and a distance matrix as an input, noisea given
 ## number of rep trees, and to return the bootstrap values for each node in list form as an
 ## output
-bootStrapWithNoiseOverRange <- function(originalMatrix, rangeMin = 1, rangeMax = 1000, numTrees = 1000, 
+bootStrapWithNoiseOverRange <- function(originalMatrix, rangeMin = 1, rangeMax = 1000, numTrees = 1000,
     rootTree = NULL) {
     sdRange = c(rangeMin:rangeMax)  #range of SD to check
     loop = c(1:numTrees)  #number of trees and intervals to make
     bootstrapList = vector("list", 0)  #blank list of bootstrap values
     mainTree = nj(as.dist(originalMatrix))
-    mainTree$edge.length[mainTree$edge.length < 0] <- abs(mainTree$edge.length[mainTree$edge.length < 
+    mainTree$edge.length[mainTree$edge.length < 0] <- abs(mainTree$edge.length[mainTree$edge.length <
         0])
     for (a in sdRange) {
-        bstrees = vector("list", 0)  #create blank object to put noised trees 
+        bstrees = vector("list", 0)  #create blank object to put noised trees
         class(bstrees) <- "multiPhylo"
         for (i in loop) {
             x <- originalMatrix  #reset matrix
@@ -62,7 +62,7 @@ bootStrapWithNoiseOverRange <- function(originalMatrix, rangeMin = 1, rangeMax =
             }
             x[x < 0] < -0  #set negative to zero
             treex <- nj(as.dist(x))
-            treex$edge.length[treex$edge.length < 0] <- abs(treex$edge.length[treex$edge.length < 
+            treex$edge.length[treex$edge.length < 0] <- abs(treex$edge.length[treex$edge.length <
                 0])
             if (!is.null(rootTree)) {
                 treex = root(treex, rootTree)
@@ -120,7 +120,7 @@ readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot =
 # clade assignments output: A list of two dataframes.  The first documenting each clade's
 # average in and out distances for each tree.  The second is a simplified, average in/out score
 # for each tree. Last modified- 7-15-16
-treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, 
+treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL,
     refCompareMethod = "edgeset") {
     clade_list <- read.table(file = cladeListFile, header = FALSE)
     colnames(clade_list) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
@@ -147,7 +147,7 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
         clade_means = data.frame()
         if (is.null(referenceTree) == FALSE) {
             compare[[2]] <- itree  #put this tree in our comparison slot
-            distance = c(distance = as.character(dist.multiPhylo(compare, method = refCompareMethod)), 
+            distance = c(distance = as.character(dist.multiPhylo(compare, method = refCompareMethod)),
                 treename = as.character(names(multiPhyloTrees[b])))
             refDistTracker = rbind(refDistTracker, distance, stringsAsFactors = FALSE)
         }
@@ -166,19 +166,19 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
                 clade_out = c(clade_out, out_distancesa)
             }
             # now, store the average in and out distances for this particular clade
-            clade_data = data.frame(avg_in = mean(as.numeric(clade_in)), avg_out = mean(as.numeric(clade_out)), 
+            clade_data = data.frame(avg_in = mean(as.numeric(clade_in)), avg_out = mean(as.numeric(clade_out)),
                 clade = i, check.names = FALSE)
             clade_means = rbind(clade_means, clade_data)
         }
         # Finally, assign the mean in, mean out, min out, and max in distances for the tree
         toadd = data.frame(clade_means, tree = names(multiPhyloTrees[b]))
-        simpleadd = data.frame(in_avg = mean(clade_means$avg_in, na.rm = TRUE), out_avg = mean(clade_means$avg_out, 
+        simpleadd = data.frame(in_avg = mean(clade_means$avg_in, na.rm = TRUE), out_avg = mean(clade_means$avg_out,
             na.rm = TRUE), tree = names(multiPhyloTrees[b]))
         allTreesData = rbind(allTreesData, toadd)
         simpleTreesData = rbind(simpleTreesData, simpleadd)
     }  #finish looping through trees
-    
-    simpleTreesData = cbind(simpleTreesData, inPRank = rank(simpleTreesData$in_avg)/length(simpleTreesData$in_avg) * 
+
+    simpleTreesData = cbind(simpleTreesData, inPRank = rank(simpleTreesData$in_avg)/length(simpleTreesData$in_avg) *
         100, outPRank = rank(simpleTreesData$out_avg)/length(simpleTreesData$out_avg) * 100)
     if (is.null(referenceTree) == FALSE) {
         colnames(refDistTracker) = c("distance", "treeName")
@@ -230,116 +230,40 @@ computeQuantiles <- function(treeDistanceData, cutOffNum, greaterThan = TRUE) {
     return(x)
 }
 
-
-
 # calculate the average distance between groups given a distance matrix and a clade list 12-5-16
 
-withinGroupDistancesTwo <- function(distanceMatrix, clade_list) {
-    require("dplyr")
-    # remove items from clade_list not in tree
-    clade_list <- filter(clade_list, Idcorrected %in% row.names(distanceMatrix))
-    
-    idist = na.omit(melt(distanceMatrix))
-    colnames(idist) <- c("a", "b", "dist")
-    
-    allSelfDists = data.frame()
-    clade_loop <- unique(clade_list$hostGenus)
-    # loop through all clade self comparisons, add to DF
-    for (i in clade_loop) {
-        # retrieve all genomes matching i as character
-        itaxa <- as.character(clade_list[which(clade_list$hostGenus == i), 2])
-        if (length(itaxa > 1)) {
-            for (a in itaxa) {
-                intaxa = itaxa[itaxa != a]  #remove variable from list
-                # retrieve values matching a
-                ataxa = idist[idist$a %in% a, ]
-                # calculate in-distances
-                in_distancesa = ataxa[ataxa$b %in% intaxa, 3]
-                if (length(in_distancesa > 0)) {
-                  toAdd = cbind(as.numeric(in_distancesa), as.character(i), a)
-                }
-                
-                allSelfDists = rbind(allSelfDists, toAdd)
-            }
+
+withinGroupDistancesThree <- function(distanceMatrix, clade_assignments, ID_names){
+  require('dplyr')
+
+  idist = na.omit(melt(distanceMatrix))
+  colnames(idist) <- c("a", "b", "dist")
+
+  allSelfDists = data.frame()
+  clade_loop <- unique(clade_list$clades)
+  #loop through all clade self comparisons, add to DF
+  for (i in clade_loop){
+    #retrieve all genomes matching i as character
+    itaxa <- as.character(clade_list[which(clade_list$clades == i),1]) # this is highly problematic
+    if (length(itaxa > 1)){
+      for (a in itaxa) {
+        intaxa =  itaxa[itaxa != a]    #remove variable from list
+        #retrieve values matching a
+        ataxa= idist[idist$a %in% a,]
+        #calculate in-distances
+        in_distancesa= ataxa[ataxa$b %in% intaxa, 3]
+        if(length(in_distancesa > 0)){
+          toAdd = cbind(as.numeric(in_distancesa), as.character(i), a)
         }
+
+        allSelfDists = rbind(allSelfDists, toAdd)
+      }
     }
-    colnames(allSelfDists) <- c("distance", "clade")
-    allSelfDists$distance <- as.numeric(as.character(allSelfDists$distance))
-    return(allSelfDists)
+  }
+  colnames(allSelfDists) <- c("distance", "clade")
+  allSelfDists$distance<- as.numeric(as.character(allSelfDists$distance))
+  return(allSelfDists)
 }
 
 
 
-
-
-
-
-# calculate the average distance between groups given a distance matrix and a clade list 8-15-16
-
-withinGroupDistances <- function(distanceMatrix, clade_list) {
-    idist = na.omit(melt(distanceMatrix))
-    colnames(idist) <- c("a", "b", "dist")
-    allSelfDists = data.frame()
-    clade_loop <- unique(clade_list$hostGenus)
-    # loop through all clade self comparisons, add to DF
-    for (i in clade_loop) {
-        # retrieve all genomes matching i as character
-        itaxa <- as.character(clade_list[which(clade_list$hostGenus == i), 2])
-        if (length(itaxa < 2)) {
-            # Skip this clade if theres 1 or 0 taxa.
-        } else {
-            for (a in itaxa) {
-                intaxa = itaxa[itaxa != a]  #remove variable from list
-                # retrieve values matching a
-                ataxa = idist[idist$a %in% a, ]
-                # calculate in-distances
-                in_distancesa = ataxa[ataxa$b %in% intaxa, 3]
-                toAdd = cbind(as.numeric(in_distancesa), as.character(i))
-                allSelfDists = rbind(allSelfDists, toAdd)
-            }
-        }
-    }
-    colnames(allSelfDists) <- c("distance", "clade")
-    allSelfDists$distance <- as.numeric(as.character(allSelfDists$distance))
-    return(allSelfDists)
-    
-}
-
-
-### 12-2-16 Function to write 1,000 bootstrap trees, where within-clade distances (only!) are
-### noised by the normal distribution with SD= that clade's within SD. returns bootstrap trees
-
-bootstrapFromNormInCladeOnly <- function(startingTree, clade_list, withinSDtable, ntrees = 1000) {
-    master <- startingTree
-    bstrees = vector("list", 0)  #create blank object to put noised trees in
-    class(bstrees) <- "multiPhylo"
-    loop = c(1:ntrees)  #number of trees and intervals to make
-    for (i in loop) {
-        x <- master  #reset matrix
-        for (a in as.character(clade_list$Idcorrected)) {
-            # lookup this clade
-            thisClade <- as.character(unlist(clade_list %>% filter(Idcorrected == as.character(a)) %>% 
-                select(hostGenus)))
-            # determine SD to noise from
-            thisSD <- withinSDtable %>% filter(clade == thisClade) %>% select(sd)
-            # get all taxa in this clade excluding itself
-            matchingTaxa <- as.list(clade_list %>% filter(hostGenus == thisClade) %>% select(Idcorrected) %>% 
-                filter(Idcorrected != as.character(a)))
-            for (b in matchingTaxa$Idcorrected) {
-                sublista <- idist[which(idist$a == a), ]
-                sublist <- sublista[which((sublista$b) == b), ]  #retrieve the distance between these two strains
-                thisDist = as.numeric(sublist[, 3])
-                newVal = (thisDist + rnorm(1, mean = 0, sd = as.numeric(thisSD)))  #randomly sample 1 value from rnorm of this SD
-                x[b, a] <- newVal
-                x[a, b] <- newVal
-            }
-        }
-        x <- abs(x)  #Convert negative to positive
-        treex <- nj(as.dist(x))
-        treex$edge.length[treex$edge.length < 0] <- abs(treex$edge.length[treex$edge.length < 0])
-        bstrees[[i]] <- treex
-        message = paste("finished with tree number", i)
-        print(message)
-    }
-    return(bstrees)
-}

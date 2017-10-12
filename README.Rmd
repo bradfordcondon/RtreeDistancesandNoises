@@ -2,20 +2,8 @@
 Bradford Condon
 University of Kentucky
 
-Last updated 7-28-16
 
-
-**bootStrapWithNoiseFromNorm**
-goal- to take a distance matrix, Standard deviation, and number of trees, and return the confidence interval trees for this SD via normal noising
-
-**bootStrapWithNoiseOverRange**
-
-**readAndCombineTrees**
-
-**treesToCladeCompare**
-
-**trimTreeToTree**
-
+Note: this module is currently under development, converting it from scripts to a simple standalone package.
 
 
 ### General coding practices

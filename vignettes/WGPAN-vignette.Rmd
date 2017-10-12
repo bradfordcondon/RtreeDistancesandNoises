@@ -1,0 +1,147 @@
+---
+title: "WGPAN"
+author: "Bradford Condon"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{WGPAN}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Introduction
+
+WGPAN (Whole-Genome Pairwise Alignment Noising).
+
+Apologies about the inconsistent camel_case and snakeCase usaage, I was but a fledgeling programmer.
+
+```{r}
+library('knitr')
+library('dplyr')
+library('reshape')
+source('../R/AuxFunctions.R')
+source('../R/CondonPhyloFunctions.R')
+
+```
+
+
+## Loading data
+
+Note that the matrix **MUST** be identical across the diagonal for the distance calculation to work.
+
+```{r readInData, }
+ID <- c("Amanita","Polyporus","Coprinus", "Daldinia", "Entoloma", "Flaviporus")
+myData<- matrix(sample(100:10000, 36), nrow = 6, ncol = 6,  dimnames = list(taxa, taxa)) 
+diag(myData)<- 0 #set diagonal to 0
+
+```
+
+## import clade list
+```{r clade_list}
+
+clades = c("Agaricales", "Polyporales", "Agaricales", "Xylariales", "Agaricales", "Polyporales")
+clade_list = data.frame(ID, clades)
+kable(clade_list)
+```
+
+##Generate within-clade distance table
+Calculate the distances between all within-clade comparisons.  Make a boxplot of this, then make a summary table with the SD and mean.
+
+```{r, withinCladeDistances}
+x<- myData
+idist = na.omit(melt(x))
+colnames(idist) <- c("a", "b", "dist")
+allSelfDists = data.frame()
+clade_loop <- unique(clade_list$clades)
+
+#remove items from clade_list not in tree
+  clade_list<- filter(clade_list, ID %in% row.names(distanceMatrix))
+  
+ID_names <- clade_list$ID
+clade_assignments <-clade_list$clades
+
+WithinDistanceTable <- withinGroupDistancesThree(distanceMatrix = x, clade_assignments = clade_assignments, ID_names = ID_names)
+boxplot(distance ~ clade, data = WithinDistanceTable, las=3 , main = "within-clade distances 1-11-17", ylab = "SNPs/MB" )
+withinSDtable<- WithinDistanceTable %>% group_by(clade)%>%summarize(sd = sd(distance), mean = mean(distance))
+
+kable(withinSDtable)
+#replace NA with 0
+withinSDtable[is.na(withinSDtable)]<- 0
+
+write.table(withinSDtable, file = paste(outputFolder, "withinSDTable_1-11-16.txt", sep=""))
+
+
+```
+
+
+##Noise tree
+
+Next, we want to noise the tree based on this distance file.
+
+```{r, noiseTree, eval=FALSE}
+
+###
+#Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
+###
+
+bstrees = vector("list", 0)  #create blank object to put noised trees in
+class(bstrees) <- "multiPhylo"
+loop = c(1:1000)  #number of trees and intervals to make
+for (i in loop) {  
+  x <- myDataTrim #reset matrix
+  for (a in as.character(clade_list$Idcorrected)) {
+    #lookup this clade
+  thisClade <-  as.character(unlist(clade_list %>% filter(Idcorrected == as.character(a)) %>% select (WG_clade )))
+        #determine SD to noise from
+      thisSD <- withinSDtable %>% filter(clade == thisClade) %>% select (sd)
+   #get all taxa in this clade excluding itself
+   matchingTaxa <- as.list(clade_list %>% filter(WG_clade == thisClade) %>% select (Idcorrected) %>% filter(Idcorrected != as.character(a)))
+   
+    for (b in matchingTaxa$Idcorrected){  
+      sublista <- idist[which(idist$a == a  ) ,]
+      sublist <- sublista[which((sublista$b) == b ),]  #retrieve the distance between these two strains
+      thisDist = as.numeric(sublist[,3]) 
+      newVal = (thisDist + rnorm(1, mean = 0, sd = as.numeric(thisSD)))   #randomly sample 1 value from rnorm of this SD
+      x[b,a] <-  newVal
+      x[a,b] <- newVal
+    }
+  }   
+  x <- abs(x)  #Convert negative to positive
+  treex<-  nj(as.dist(x))
+  treex$edge.length[treex$edge.length <0] <- abs(treex$edge.length[treex$edge.length<0]) 
+  bstrees[[i]] <- treex 
+  message = paste("finished with tree number" , i)
+  print(message)
+}
+write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
+
+```
+
+Now that we have 1000 bootstrap trees, add them as bootstraps to original tree using prop.clades.
+
+Note we remove all labels that are below 50% bootstrap support.
+Note also that interclade distances *are not noised*.  As such we are only looking at nodes defining clades, not nodes defining relationships between clades.
+
+
+On the performance of prop.clades:
+
+>Since ape 3.5, prop.clades should return sensible results for all values of rooted: if FALSE, the
+numbers of bipartitions (or splits); if TRUE, the number of clades (of hopefully rooted trees).
+
+
+
+```{r, }
+#read in bootstrap trees
+bstrees<- read.nexus(paste(outputFolder,"", sep = "bootstrapTreesV5__5-21-16.nexus"))
+master <- myDataTrim
+main_tree <- nj(as.dist(master))
+clade_support <- prop.clades(main_tree, bstrees)  #generate BS values based on trees
+clade_support = clade_support/10
+clade_support[is.na(clade_support)]<- 0
+clade_support[clade_support < 50] <- ""
+main_tree$node.labels<- clade_support 
+plot(main_tree)
+write.nexus(main_tree, file = paste(outputFolder, "Tree_NormalNoiseWithinCladeBasedOnSD_V6_4-22-17.txt", sep=""))
+```
+
