@@ -27,10 +27,10 @@ source('../R/distance_trees.R')
 # Installation
 
 #### Using github
-
+```
 library(devtools)
 install_github("bradfordcondon/WGPAN")
-
+```
 This package is not yet accepted in CRAN or BioConductor.  Once it is, instructions on installing it this way will be made available.
 
 
