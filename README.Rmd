@@ -80,7 +80,7 @@ Next, we want to noise the tree based on this distance file.
 ###
 #Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
 ###
-generate_bootstrap_trees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
+generateBootstrapTrees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
 
 ##write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
 
