@@ -23,7 +23,7 @@ library('WGPAN')
 library('knitr')
 library('reshape')
 library('dplyr')
-libary('ape')
+library('ape')
 devtools::load_all()
 ```
 
@@ -73,7 +73,7 @@ withinSDtable[is.na(withinSDtable)]<- 0
 
 Next, we want to noise the tree based on this distance file.
 
-```{r, noiseTree, eval=FALSE}
+```{r, noiseTree}
 ###
 #Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
 ###

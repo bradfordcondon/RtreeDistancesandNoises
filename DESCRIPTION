@@ -13,7 +13,8 @@ Imports:
   ape,
   phytools,
   distory,
-  reshape
+  reshape,
+  stats
 Suggests:
   knitr,
   rmarkdown
