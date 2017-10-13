@@ -3,12 +3,9 @@
 
 
 within_group_distances <- function(distanceMatrix, clade_assignments, ID_names) {
-    require("dplyr")
     clade_list = data.frame(ID_names, clade_assignments)
-    
-    idist = na.omit(melt(distanceMatrix))
+    idist = na.omit(reshape::melt(distanceMatrix))
     colnames(idist) <- c("a", "b", "dist")  #break matrix down into sets of pairwise distances between taxon a & b where dist = dist.
-    
     allSelfDists = data.frame()
     clade_loop <- unique(clade_assignments)
     # loop through all clade self comparisons, add to DF
@@ -25,7 +22,6 @@ within_group_distances <- function(distanceMatrix, clade_assignments, ID_names) 
                 if (length(in_distancesa > 0)) {
                   toAdd = cbind(as.numeric(in_distancesa), as.character(i), a)
                 }
-                
                 allSelfDists = rbind(allSelfDists, toAdd)
             }
         }
@@ -35,13 +31,11 @@ within_group_distances <- function(distanceMatrix, clade_assignments, ID_names) 
     return(allSelfDists)
 }
 
-######## 
+########
 
 generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtable, clade_assignments, ID_names) {
-    
+
     clade_list = data.frame(ID_names, clade_assignments)
-    
-    
     bstrees = vector("list", 0)  #create blank object to put noised trees in
     class(bstrees) <- "multiPhylo"
     loop = c(1:numberOfTrees)  #number of trees and intervals to make
@@ -54,7 +48,7 @@ generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtabl
             thisSD <- withinSDtable %>% filter(clade_assignments == thisClade) %>% select(sd)
             # get all taxa in this clade excluding itself
             matchingTaxa <- as.list(clade_list %>% filter(clade_assignments == thisClade) %>% select(ID) %>% filter(ID != as.character(a)))
-            
+
             for (b in matchingTaxa$ID) {
                 sublista <- idist[which(idist$a == a), ]
                 sublist <- sublista[which((sublista$b) == b), ]  #retrieve the distance between these two strains
@@ -78,7 +72,6 @@ generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtabl
 
 ## written 7-24-16 goal- to take a distance matrix, SD, and number of trees, and return the bootstrap trees for this SD via normal noising
 bootStrapWithNoiseFromNorm <- function(originalMatrix, standardDev, numTrees = 1000, rootTree = NULL) {
-    print("warning: rooting is not currently supported")
     bstrees = vector("list", 0)  #create blank object to put noised trees
     class(bstrees) <- "multiPhylo"
     loop = c(1:numTrees)  #number of trees and intervals to make
@@ -98,21 +91,22 @@ bootStrapWithNoiseFromNorm <- function(originalMatrix, standardDev, numTrees = 1
         treex <- nj(as.dist(x))
         treex$edge.length[treex$edge.length < 0] <- abs(treex$edge.length[treex$edge.length < 0])
         if (!is.null(rootTree)) {
-            treex = multi2di(treex)
+            treex = ape::multi2di(treex)
         }
         bstrees[[i]] <- treex
-        # message = paste('finished with tree number' , i) print(message)
+        message = paste('finished with tree number' , i)
+        print(message)
     }
     return(bstrees)
 }
-#### 
+####
 
 ## written 7-24-16 Goal: To take a range of SDs and a distance matrix as an input, noisea given number of rep trees, and to return the bootstrap values for each node in list form as an output
 bootStrapWithNoiseOverRange <- function(originalMatrix, rangeMin = 1, rangeMax = 1000, numTrees = 1000, rootTree = NULL) {
     sdRange = c(rangeMin:rangeMax)  #range of SD to check
     loop = c(1:numTrees)  #number of trees and intervals to make
     bootstrapList = vector("list", 0)  #blank list of bootstrap values
-    mainTree = nj(as.dist(originalMatrix))
+    mainTree = ape::nj(as.dist(originalMatrix))
     mainTree$edge.length[mainTree$edge.length < 0] <- abs(mainTree$edge.length[mainTree$edge.length < 0])
     for (a in sdRange) {
         bstrees = vector("list", 0)  #create blank object to put noised trees
@@ -132,7 +126,7 @@ bootStrapWithNoiseOverRange <- function(originalMatrix, rangeMin = 1, rangeMax =
             treex <- nj(as.dist(x))
             treex$edge.length[treex$edge.length < 0] <- abs(treex$edge.length[treex$edge.length < 0])
             if (!is.null(rootTree)) {
-                treex = root(treex, rootTree)
+                treex = ape::root(treex, rootTree)
             }
             bstrees[[i]] <- treex
         }

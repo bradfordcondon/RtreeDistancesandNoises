@@ -13,9 +13,8 @@ Imports:
   ape,
   phytools,
   distory,
-  reshape,
-  grid
-Suggests: 
+  reshape
+Suggests:
   knitr,
   rmarkdown
 VignetteBuilder: knitr

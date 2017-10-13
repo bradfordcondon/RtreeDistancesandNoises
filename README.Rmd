@@ -6,8 +6,6 @@ Special thanks to Hadley Wickham for writing [a fantastsic guide to distributing
 
 Note: this module is currently under development, converting it from scripts to a simple standalone package.   This package uses`formatR::tidy_dir("R")` to format code. Apologies about the inconsistent camel_case and snakeCase usaage, I was but a fledgeling programmer.
 
-install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
-
 
 ## Build Status
 
@@ -74,7 +72,7 @@ withinSDtable[is.na(withinSDtable)]<- 0
 ```
 
 
-##Noise tree
+## Noise tree
 
 Next, we want to noise the tree based on this distance file.
 
@@ -88,7 +86,7 @@ generate_bootstrap_trees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable
 
 ```
 
-Now that we have 1000 bootstrap trees, add them as bootstraps to original tree using prop.clades.
+Now that we have 1000 bootstrap trees, add them as bootstraps to the original tree using prop.clades.
 
 Note we remove all labels that are below 50% bootstrap support.
 Note also that interclade distances *are not noised*.  As such we are only looking at nodes defining clades, not nodes defining relationships between clades.

@@ -1,7 +1,3 @@
-library(ape)
-library(phytools)
-library(distory)
-
 ## readAndCombineTrees imports directory of tree files, trims and roots as necessary, returns multiphylo object
 #' Collates a folder of tree files into a single multiPhylo tree object.
 #'
@@ -21,17 +17,17 @@ readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot =
     for (i in (loop)) {
         filename = file_list[i]
         treeFile = paste(pathToTrees, "/", filename, sep = "")
-        itree <- read.tree(treeFile, tree.names = filename)
+        itree <- ape::read.tree(treeFile, tree.names = filename)
         itree$tip.label <- gsub("NEW_GENOMES/FASTA/", "", perl = TRUE, itree$tip)  #trim node labels
         itree$tip.label <- gsub("_.*", "", perl = TRUE, itree$tip)
         if (is.null(taxaToExclude) == FALSE) {
             for (j in taxaToExclude) {
                 # drop tips matching taxaToExclude
-                itree = drop.tip(itree, c(j, trim.internal = TRUE))  #delete tips as needed
+                itree = ape::drop.tip(itree, c(j, trim.internal = TRUE))  #delete tips as needed
             }
         }
         if (is.null(taxonToRoot) == FALSE) {
-            itree = root(itree, taxonToRoot, resolve.root = TRUE)
+            itree = ape::root(itree, taxonToRoot, resolve.root = TRUE)
         }
         # convert to absolute value
         itree$edge.length[itree$edge.length < 0] <- abs(itree$edge.length[itree$edge.length < 0])
@@ -49,7 +45,7 @@ trimTreeToTree <- function(treeToTrim, limitingTree) {
     limTips = limitingTree$tip
     tipsToDrop <- unTrimTips[!unTrimTips %in% limTips]
     for (i in tipsToDrop) {
-        treeToTrim = drop.tip(treeToTrim, c(i, trim.internal = TRUE))  #delete tips as needed
+        treeToTrim = ape::drop.tip(treeToTrim, c(i, trim.internal = TRUE))  #delete tips as needed
     }
     finalTree <- treeToTrim
     return(finalTree)
@@ -66,7 +62,7 @@ trimTreeFromList <- function(treeToTrim, listToDrop) {
     finalTree <- treeToTrim
     return(finalTree)
 }
-##### Generate report (histogram, quantile cutoffs) for in/out clade distances Not sure if this is working as intended 7-28-16
+##### Generate report (histogram, quantile cutoffs) for in/out clade distances
 
 computeQuantiles <- function(treeDistanceData, cutOffNum, greaterThan = TRUE) {
     totalNum = length(dataToConvert[, 1])
@@ -271,37 +267,4 @@ treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", 
         myOutput[4] <- keyCladesOutput
     }
     return(myOutput)
-}
-
-# combine ggplots credits to stack overflow
-multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
-    library(grid)
-
-    # Make a list from the ... arguments and plotlist
-    plots <- c(list(...), plotlist)
-
-    numPlots = length(plots)
-
-    # If layout is NULL, then use 'cols' to determine layout
-    if (is.null(layout)) {
-        # Make the panel ncol: Number of columns of plots nrow: Number of rows needed, calculated from # of cols
-        layout <- matrix(seq(1, cols * ceiling(numPlots/cols)), ncol = cols, nrow = ceiling(numPlots/cols))
-    }
-
-    if (numPlots == 1) {
-        print(plots[[1]])
-
-    } else {
-        # Set up the page
-        grid.newpage()
-        pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-
-        # Make each plot, in the correct location
-        for (i in 1:numPlots) {
-            # Get the i,j matrix positions of the regions that contain this subplot
-            matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-
-            print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row, layout.pos.col = matchidx$col))
-        }
-    }
 }
