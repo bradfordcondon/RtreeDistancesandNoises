@@ -25,6 +25,8 @@ library('reshape')
 library('dplyr')
 library('ape')
 library('devtools')
+install.packages('devtools')
+install.packages('roxygen2')
 devtools::load_all()
 ```
 
