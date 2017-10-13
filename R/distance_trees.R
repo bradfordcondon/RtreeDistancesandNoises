@@ -3,7 +3,8 @@
 #' @param distanceMatrix The distance matrix
 #' @param cladeAssignments The clade assignments
 #' @param ID_names  List of IDs
-#'
+#' @export
+
 
 withinGroupDistances <- function(distanceMatrix, cladeAssignments, ID_names) {
     cladeList = data.frame(ID_names, cladeAssignments)
