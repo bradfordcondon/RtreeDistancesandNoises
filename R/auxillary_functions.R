@@ -1,4 +1,3 @@
-## readAndCombineTrees imports directory of tree files, trims and roots as necessary, returns multiphylo object
 #' Collates a folder of tree files into a single multiPhylo tree object.
 #'
 #' @param pathToTrees The path to your trees folder.
@@ -37,9 +36,6 @@ readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot =
     return(allMyTrees)
 }
 
-
-### Trim tree A based on tips in tree B. Intended purpose is for cutting back the reference tree to remove exlcuded taxa input: Two tree files- a tree to trim, and a tree
-### to serve as teh template for trimming tips.
 #' Trims the tips of a target tree A to match the tips of source tree B.
 #'
 #' @param treeToTrim The target tree that you would like to drop tips on.
@@ -143,8 +139,8 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
         allTreesData = rbind(allTreesData, toadd)
         simpleTreesData = rbind(simpleTreesData, simpleadd)
     }  #finish looping through trees
-    
-    simpleTreesData = cbind(simpleTreesData, inPRank = rank(simpleTreesData$inAverage)/length(simpleTreesData$inAverage) * 100, outPRank = rank(simpleTreesData$outAverage)/length(simpleTreesData$outAverage) * 
+
+    simpleTreesData = cbind(simpleTreesData, inPRank = rank(simpleTreesData$inAverage)/length(simpleTreesData$inAverage) * 100, outPRank = rank(simpleTreesData$outAverage)/length(simpleTreesData$outAverage) *
         100)
     if (is.null(referenceTree) == FALSE) {
         colnames(refDistTracker) = c("distance", "treeName")
@@ -172,7 +168,7 @@ analyzeTips <- function(multiPhyloObject) {
             if (thisTip %in% tipLabelCounter[, 1]) {
                 # if the column does exist, add +1.
                 tipLabelCounter[tipLabelCounter$tip == thisTip, 2] <- as.numeric(tipLabelCounter[tipLabelCounter$tip == thisTip, 2]) + 1
-                
+
             } else {
                 # if it doesnt, create it, set it to 1
                 toAddtwo <- cbind(tip = thisTip, count = 1, stringsAsFactors = FALSE)

@@ -1,8 +1,11 @@
+####### calculate the average distance between groups given a distance matrix and a clade list
+#' Calculate the average distance between groups given a distance matrix and a clade
+#' @param distanceMatrix The distance matrix
+#' @param cladeAssignments The clade assignments
+#' @param ID_names  List of IDs
+#'
 
-####### calculate the average distance between groups given a distance matrix and a clade list 12-5-16
-
-
-within_group_distances <- function(distanceMatrix, cladeAssignments, ID_names) {
+withinGroupDistances <- function(distanceMatrix, cladeAssignments, ID_names) {
     cladeList = data.frame(ID_names, cladeAssignments)
     idist = na.omit(reshape::melt(distanceMatrix))
     colnames(idist) <- c("a", "b", "dist")  #break matrix down into sets of pairwise distances between taxon a & b where dist = dist.
@@ -31,10 +34,16 @@ within_group_distances <- function(distanceMatrix, cladeAssignments, ID_names) {
     return(allSelfDists)
 }
 
-######## 
+########
+#' Bootstraps
+#' @param distanceMatrix hk
+#' @param numberOfTrees hkj
+#' @param withinSDtable hkj
+#' @param cladeAssignments hkj
+#' @param ID_names hkj
+#'
+generateBootstrapTrees <- function(distanceMatrix, numberOfTrees, withinSDtable, cladeAssignments, ID_names) {
 
-generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtable, cladeAssignments, ID_names) {
-    
     cladeList = data.frame(ID_names, cladeAssignments)
     bstrees = vector("list", 0)  #create blank object to put noised trees in
     class(bstrees) <- "multiPhylo"
@@ -48,7 +57,7 @@ generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtabl
             thisSD <- withinSDtable %>% filter(cladeAssignments == thisClade) %>% select(sd)
             # get all taxa in this clade excluding itself
             matchingTaxa <- as.list(cladeList %>% filter(cladeAssignments == thisClade) %>% select(ID) %>% filter(ID != as.character(a)))
-            
+
             for (b in matchingTaxa$ID) {
                 sublista <- idist[which(idist$a == a), ]
                 sublist <- sublista[which((sublista$b) == b), ]  #retrieve the distance between these two strains
@@ -70,7 +79,14 @@ generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtabl
 
 
 
-## written 7-24-16 goal- to take a distance matrix, SD, and number of trees, and return the bootstrap trees for this SD via normal noising
+#takes a distance matrix, SD, and number of trees, and return the bootstrap trees for this SD via normal noising
+########
+#' noise
+#' @param originalMatrix hkjh
+#' @param standardDev kjhjkh
+#' @param numTrees hkjh
+#' @param rootTree kjhkj
+#'
 bootStrapWithNoiseFromNorm <- function(originalMatrix, standardDev, numTrees = 1000, rootTree = NULL) {
     bstrees = vector("list", 0)  #create blank object to put noised trees
     class(bstrees) <- "multiPhylo"
@@ -99,10 +115,17 @@ bootStrapWithNoiseFromNorm <- function(originalMatrix, standardDev, numTrees = 1
     }
     return(bstrees)
 }
-#### 
 
-## written 7-24-16 Goal: To take a range of SDs and a distance matrix as an input, noisea given number of rep trees, and to return the bootstrap values for each node in
+#Goal: To take a range of SDs and a distance matrix as an input, noisea given number of rep trees, and to return the bootstrap values for each node in
 ## list form as an output
+########
+#' Bootstraps
+#' @param originalMatrix hkjh
+#' @param rangeMin hkj
+#' @param rangeMax khj
+#' @param numTrees khj
+#' @param rootTree hkj
+#'
 bootStrapWithNoiseOverRange <- function(originalMatrix, rangeMin = 1, rangeMax = 1000, numTrees = 1000, rootTree = NULL) {
     sdRange = c(rangeMin:rangeMax)  #range of SD to check
     loop = c(1:numTrees)  #number of trees and intervals to make
