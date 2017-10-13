@@ -8,6 +8,11 @@ Note: this module is currently under development, converting it from scripts to 
 
 install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
 
+
+## Build Status
+
+[![Travis-CI Build Status](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises.svg?branch=master)](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises)
+
 ## Introduction
 
 WGPAN (Whole-Genome Pairwise Alignment Noising).
