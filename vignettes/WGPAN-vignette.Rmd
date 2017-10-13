@@ -16,7 +16,7 @@ knitr::opts_chunk$set(include = TRUE)
 
 WGPAN (Whole-Genome Pairwise Alignment Noising).
 
-Apologies about the inconsistent camel_case and snakeCase usaage, I was but a fledgeling programmer.
+Apologies about the inconsistent camel_case and snakeCase usage, I was but a fledgeling programmer.
 
 ```{r}
 library('knitr')
@@ -40,11 +40,11 @@ diag(myData)<- 0 #set diagonal to 0
 ```
 
 ## import clade list
-```{r clade_list}
+```{r cladeList}
 
 clades = c("Agaricales", "Polyporales", "Agaricales", "Xylariales", "Agaricales", "Polyporales")
-clade_list = data.frame(ID, clades)
-kable(clade_list)
+cladeList = data.frame(ID, clades)
+kable(cladeList)
 ```
 
 ## Generate within-clade distance table
@@ -55,15 +55,15 @@ x<- myData
 idist = na.omit(melt(x))
 colnames(idist) <- c("a", "b", "dist")
 allSelfDists = data.frame()
-clade_loop <- unique(clade_list$clades)
+clade_loop <- unique(cladeList$clades)
 
-#remove items from clade_list not in tree
-  clade_list<- filter(clade_list, ID %in% row.names(myData))
+#remove items from cladeList not in tree
+  cladeList<- filter(cladeList, ID %in% row.names(myData))
   
-ID_names <- clade_list$ID
-clade_assignments <-clade_list$clades
+ID_names <- cladeList$ID
+cladeAssignments <-cladeList$clades
 
-WithinDistanceTable <- within_group_distances(distanceMatrix = x, clade_assignments = clade_assignments, ID_names = ID_names)
+WithinDistanceTable <- within_group_distances(distanceMatrix = x, cladeAssignments = cladeAssignments, ID_names = ID_names)
 
 boxplot(distance ~ clade, data = WithinDistanceTable, las=3 , main = "within-clade distances 1-11-17", ylab = "SNPs/MB" )
 withinSDtable<- WithinDistanceTable %>% group_by(clade)%>%summarize(sd = sd(distance), mean = mean(distance))
@@ -83,7 +83,7 @@ Next, we want to noise the tree based on this distance file.
 ###
 #Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
 ###
-generate_bootstrap_trees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, clade_assignments = clade_assignments, ID_names = ID_names)
+generate_bootstrap_trees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
 
 ##write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
 
