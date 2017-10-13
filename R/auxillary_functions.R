@@ -40,6 +40,15 @@ readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot =
 
 ### Trim tree A based on tips in tree B. Intended purpose is for cutting back the reference tree to remove exlcuded taxa input: Two tree files- a tree to trim, and a tree
 ### to serve as teh template for trimming tips.
+#' Trims the tips of a target tree A to match the tips of source tree B.
+#'
+#' @param treeToTrim The target tree that you would like to drop tips on.
+#' @param limitingTree The source tree that will determine which tips are dropped.
+#'
+#' @return Output is the trimmed tree of treeToTrim.
+#'
+#'
+
 trimTreeToTree <- function(treeToTrim, limitingTree) {
     unTrimTips = treeToTrim$tip
     limTips = limitingTree$tip
@@ -51,6 +60,14 @@ trimTreeToTree <- function(treeToTrim, limitingTree) {
     return(finalTree)
 }
 ### Trim tree based on list of tips
+#' Drops a set of tips from a tree.
+#'
+#' @param treeToTrim The target tree that you would like to drop tips on.
+#' @param listToDrop A list of tips to drop.
+#'
+#' @return Output is the trimmed tree of treeToTrim.
+#'
+#'
 
 trimTreeFromList <- function(treeToTrim, listToDrop) {
     unTrimTips = treeToTrim$tip
@@ -62,23 +79,17 @@ trimTreeFromList <- function(treeToTrim, listToDrop) {
     finalTree <- treeToTrim
     return(finalTree)
 }
-##### Generate report (histogram, quantile cutoffs) for in/out clade distances
-
-computeQuantiles <- function(treeDistanceData, cutOffNum, greaterThan = TRUE) {
-    totalNum = length(dataToConvert[, 1])
-    if (is.null(greaterThan) == FALSE) {
-        x = ceiling(percentCutoff * totalNum/100)
-        sort(dataToConvert[1:x, 1])
-    }
-    if (is.null(greaterThan) == TRUE) {
-        x = floor(percentCutoff * totalNum/100)
-    }
-    return(x)
-}
 
 
 # #####determining distances Function: treesToCladeCompare.  input: Multiphylo object, list of clade assignments output: A list of two dataframes.  The first
-# documenting each clade's average in and out distances for each tree.  The second is a simplified, average in/out score for each tree. Last modified- 7-15-16
+# documenting each clade's average in and out distances for each tree.  The second is a simplified, average in/out score for each tree.
+
+#' Calculate in and out distances between and within clades for a set of trees.
+#' @param multiPhyloTrees The tree object.
+#' @param cladeListFile The file.
+#' @param referenceTree A reference tree.
+#' @param refCompareMethod The method to use for dist.multiPhylo.
+
 treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, refCompareMethod = "edgeset") {
     cladeList <- read.table(file = cladeListFile, header = FALSE)
     colnames(cladeList) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
@@ -144,7 +155,9 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
     return(myOutput)
 }
 
-## AnalyzeTips goal: determine which taxa are commonly missing from tips determine distribution of tip #'s so trees can be filtered.
+#' Determines which tips are missing from trees, and how often.
+#' @param multiPhyloObject The tree object.
+
 analyzeTips <- function(multiPhyloObject) {
     tipSumCounter <- data_frame()
     tipLabelCounter <- data_frame(tip = character(0), count = numeric(0))
@@ -170,104 +183,4 @@ analyzeTips <- function(multiPhyloObject) {
     colnames(tipSumCounter) <- c("treeName", "tipNumber")
     outputObject <- list(tipSumCounter, tipLabelCounter)
     return(outputObject)
-}
-
-
-
-# Function: treesToCladeCompareSpecific.  input: Multiphylo object, list of clade assignments, list of clades to focus on output: A list of two (or three) dataframes.
-# The first documenting each clade's average in and out distances for each tree.  The second is a simplified, average in/out score for each tree.  too convoluted-
-# abandoned for now.
-
-
-treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, refCompareMethod = "edgeset", keyClades = NULL) {
-    cladeList <- read.table(file = cladeListFile, header = FALSE)
-    colnames(cladeList) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
-    cladeList$ID <- gsub(".*._v_", "", perl = TRUE, cladeList$ID)  #trim the ID names, assuming names are FARMAN style
-    cladeList$ID <- gsub("_.*", "", perl = TRUE, cladeList$ID)
-    # remove NAs.
-    cladeList <- cladeList[!is.na(cladeList$ID), ]
-    cladeLoop <- unique(cladeList$host)
-    # remove taxa in the list that aren't in the tree
-    taxaToKeep = multiPhyloTrees[[1]]$tip.label
-    cladeList = cladeList[which(cladeList$ID %in% taxaToKeep), ]
-    allTreesData <- data.frame()
-    simpleTreesData <- data.frame()
-    keyCladesOutput <- data.frame()
-    if (is.null(referenceTree) == FALSE) {
-        refDistTracker = data.frame(stringsAsFactors = FALSE)
-        compare = vector("list", 2)
-        class(compare) <- "multiPhylo"  #create blank multiPhylo Object
-        compare[[1]] <- referenceTree  #store ref tree in slot1 of a multiphylo object.
-    }
-    loop = as.list(c(1:length(multiPhyloTrees)))  #Set up tree loop
-    for (b in loop) {
-        itree = multiPhyloTrees[[b]]  #retrieve distance matrix for each tree
-        idist = cophenetic.phylo(itree)
-        inTracker = character()  #reset trackers for this individual tree
-        outTracker = character()
-        cladeMeans = data.frame()
-        treeKeys = data.frame()
-        
-        if (is.null(referenceTree) == FALSE) {
-            compare[[2]] <- itree  #put this tree in our comparison slot
-            distance = c(distance = as.character(dist.multiPhylo(compare, method = refCompareMethod)), treename = as.character(names(multiPhyloTrees[b])))
-            refDistTracker = rbind(refDistTracker, distance, stringsAsFactors = FALSE)
-        }
-        for (i in cladeLoop) {
-            # retrieve all genomes matching i as character
-            itaxa <- cladeList[which(cladeList$host == i), 1]
-            nottaxa <- cladeList[which(cladeList$host != i), 1]
-            for (a in itaxa) {
-                inDistancesA = idist[a, itaxa]
-                outDistancesA = idist[a, nottaxa]
-                inTracker = c(inTracker, inDistancesA)
-                outTracker = c(outTracker, outDistancesA)
-                cladeIn = c(cladeIn, inDistancesA)
-                cladeOut = c(cladeOut, outDistancesA)
-            }
-            if (is.null(keyClades == FALSE)) {
-                # if running keyclades routine... if this clade is a key clade
-                if (i %in% keyClades) {
-                  otherKeys <- cladeList[which(cladeList$host != j & cladeList$host %in% keyClades), 1]
-                  for (a in itaxa) {
-                    inKeyDists = mean(idist[a, itaxa])
-                    outKeyDists = mean(idist[a, otherKeys])
-                    treeKeys <- rbind(cbind(inKeyDists, outKeyDists))
-                  }
-                  
-                }
-            }
-            
-            # now, store the average in and out distances for this particular clade
-            cladeData = data.frame(averageIn = mean(as.numeric(cladeIn)), averageOut = mean(as.numeric(cladeOut)), clade = i, check.names = FALSE)
-            cladeMeans = rbind(cladeMeans, cladeData)
-        }
-        # Finally, assign the mean in, mean out, min out, and max in distances for the tree
-        if (nrow(cladeMeans) > 0) {
-            toadd = data.frame(cladeMeans, tree = names(multiPhyloTrees[b]))
-        }
-        simpleadd = data.frame(inAverage = mean(cladeMeans$averageIn, na.rm = TRUE), outAverage = mean(cladeMeans$averageOut, na.rm = TRUE), tree = names(multiPhyloTrees[b]))
-        allTreesData = rbind(allTreesData, toadd)
-        simpleTreesData = rbind(simpleTreesData, simpleadd)
-        # add this tree's key info
-        if (is.null(keyClades == FALSE)) {
-            addKey = data.frame(out = mean(treeKeys[, 2]), `in` = mean(treeKeys[, 1]), tree = names(multiPhyloTrees[b]))
-            keyCladesOutput = rbind(keyCladesOutput, addKey)
-        }
-    }  #finish looping through trees
-    
-    simpleTreesData = cbind(simpleTreesData, inPRank = rank(simpleTreesData$inAverage)/length(simpleTreesData$inAverage) * 100, outPRank = rank(simpleTreesData$outAverage)/length(simpleTreesData$outAverage) * 
-        100)
-    
-    if (is.null(referenceTree) == FALSE) {
-        colnames(refDistTracker) = c("distance", "treeName")
-        myOutput <- list(cladeByCladeData = allTreesData, treeByTreeSummary = simpleTreesData, distanceToReferenceTree = refDistTracker)
-    } else {
-        myOutput <- list(cladeByCladeData = allTreesData, treeByTreeSummary = simpleTreesData, distanceToReferenceTree = NULL)
-    }
-    if (is.null(keyClades) == FALSE) {
-        # add key clades info to list
-        myOutput[4] <- keyCladesOutput
-    }
-    return(myOutput)
 }
