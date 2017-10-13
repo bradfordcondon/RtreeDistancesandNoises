@@ -10,14 +10,14 @@
 #'
 
 readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot = NULL) {
-    file_list <- list.files(path = pathToTrees)  # List files to import.
+    fileList <- list.files(path = pathToTrees)  # List files to import.
     allMyTrees = vector("list", 2)
     class(allMyTrees) <- "multiPhylo"  #create blank multiPhylo Object
-    loop = as.list(c(1:length(file_list)))  #make a loop as long as the file list
+    loop = as.list(c(1:length(fileList)))  #make a loop as long as the file list
     for (i in (loop)) {
-        filename = file_list[i]
-        treeFile = paste(pathToTrees, "/", filename, sep = "")
-        itree <- ape::read.tree(treeFile, tree.names = filename)
+        fileName = fileList[i]
+        treeFile = paste(pathToTrees, "/", fileName, sep = "")
+        itree <- ape::read.tree(treeFile, tree.names = fileName)
         itree$tip.label <- gsub("NEW_GENOMES/FASTA/", "", perl = TRUE, itree$tip)  #trim node labels
         itree$tip.label <- gsub("_.*", "", perl = TRUE, itree$tip)
         if (is.null(taxaToExclude) == FALSE) {
@@ -33,7 +33,7 @@ readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot =
         itree$edge.length[itree$edge.length < 0] <- abs(itree$edge.length[itree$edge.length < 0])
         allMyTrees[[i]] <- itree
     }
-    names(allMyTrees) = file_list
+    names(allMyTrees) = fileList
     return(allMyTrees)
 }
 
@@ -80,14 +80,14 @@ computeQuantiles <- function(treeDistanceData, cutOffNum, greaterThan = TRUE) {
 # #####determining distances Function: treesToCladeCompare.  input: Multiphylo object, list of clade assignments output: A list of two dataframes.  The first documenting each clade's average in and
 # out distances for each tree.  The second is a simplified, average in/out score for each tree. Last modified- 7-15-16
 treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, refCompareMethod = "edgeset") {
-    clade_list <- read.table(file = cladeListFile, header = FALSE)
-    colnames(clade_list) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
-    clade_list$ID <- gsub(".*._v_", "", perl = TRUE, clade_list$ID)  #trim the ID names, assuming names are FARMAN style
-    clade_list$ID <- gsub("_.*", "", perl = TRUE, clade_list$ID)
-    clade_loop <- unique(clade_list$host)
+    cladeList <- read.table(file = cladeListFile, header = FALSE)
+    colnames(cladeList) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
+    cladeList$ID <- gsub(".*._v_", "", perl = TRUE, cladeList$ID)  #trim the ID names, assuming names are FARMAN style
+    cladeList$ID <- gsub("_.*", "", perl = TRUE, cladeList$ID)
+    cladeLoop <- unique(cladeList$host)
     # remove taxa in the list that aren't in the tree
     taxaToKeep = multiPhyloTrees[[1]]$tip.label
-    clade_list = clade_list[which(clade_list$ID %in% taxaToKeep), ]
+    cladeList = cladeList[which(cladeList$ID %in% taxaToKeep), ]
     allTreesData <- data.frame()
     simpleTreesData <- data.frame()
     if (is.null(referenceTree) == FALSE) {
@@ -100,26 +100,26 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
     for (b in loop) {
         itree = multiPhyloTrees[[b]]  #retrieve distance matrix for each tree
         idist = cophenetic.phylo(itree)
-        in_tracker = character()  #reset trackers for this individual tree
-        out_tracker = character()
+        inTracker = character()  #reset trackers for this individual tree
+        outTracker = character()
         clade_means = data.frame()
         if (is.null(referenceTree) == FALSE) {
             compare[[2]] <- itree  #put this tree in our comparison slot
             distance = c(distance = as.character(dist.multiPhylo(compare, method = refCompareMethod)), treename = as.character(names(multiPhyloTrees[b])))
             refDistTracker = rbind(refDistTracker, distance, stringsAsFactors = FALSE)
         }
-        for (i in clade_loop) {
+        for (i in cladeLoop) {
             clade_in = character()
             clade_out = character()
             # retrieve all genomes matching i as character
-            itaxa <- clade_list[which(clade_list$host == i), 1]
-            nottaxa <- clade_list[which(clade_list$host != i), 1]
+            itaxa <- cladeList[which(cladeList$host == i), 1]
+            nottaxa <- cladeList[which(cladeList$host != i), 1]
             for (a in itaxa) {
-                in_distancesa = idist[a, itaxa]
+                inDistancesA = idist[a, itaxa]
                 out_distancesa = idist[a, nottaxa]
-                in_tracker = c(in_tracker, in_distancesa)
-                out_tracker = c(out_tracker, out_distancesa)
-                clade_in = c(clade_in, in_distancesa)
+                inTracker = c(inTracker, inDistancesA)
+                outTracker = c(outTracker, out_distancesa)
+                clade_in = c(clade_in, inDistancesA)
                 clade_out = c(clade_out, out_distancesa)
             }
             # now, store the average in and out distances for this particular clade
@@ -178,16 +178,16 @@ analyzeTips <- function(multiPhyloObject) {
 
 
 treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, refCompareMethod = "edgeset", keyClades = NULL) {
-    clade_list <- read.table(file = cladeListFile, header = FALSE)
-    colnames(clade_list) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
-    clade_list$ID <- gsub(".*._v_", "", perl = TRUE, clade_list$ID)  #trim the ID names, assuming names are FARMAN style
-    clade_list$ID <- gsub("_.*", "", perl = TRUE, clade_list$ID)
+    cladeList <- read.table(file = cladeListFile, header = FALSE)
+    colnames(cladeList) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
+    cladeList$ID <- gsub(".*._v_", "", perl = TRUE, cladeList$ID)  #trim the ID names, assuming names are FARMAN style
+    cladeList$ID <- gsub("_.*", "", perl = TRUE, cladeList$ID)
     # remove NAs.
-    clade_list <- clade_list[!is.na(clade_list$ID), ]
-    clade_loop <- unique(clade_list$host)
+    cladeList <- cladeList[!is.na(cladeList$ID), ]
+    cladeLoop <- unique(cladeList$host)
     # remove taxa in the list that aren't in the tree
     taxaToKeep = multiPhyloTrees[[1]]$tip.label
-    clade_list = clade_list[which(clade_list$ID %in% taxaToKeep), ]
+    cladeList = cladeList[which(cladeList$ID %in% taxaToKeep), ]
     allTreesData <- data.frame()
     simpleTreesData <- data.frame()
     keyCladesOutput <- data.frame()
@@ -201,8 +201,8 @@ treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", 
     for (b in loop) {
         itree = multiPhyloTrees[[b]]  #retrieve distance matrix for each tree
         idist = cophenetic.phylo(itree)
-        in_tracker = character()  #reset trackers for this individual tree
-        out_tracker = character()
+        inTracker = character()  #reset trackers for this individual tree
+        outTracker = character()
         clade_means = data.frame()
         treeKeys = data.frame()
 
@@ -211,22 +211,22 @@ treesToCladeCompareKey <- function(multiPhyloTrees, cladeListFile = "list.txt", 
             distance = c(distance = as.character(dist.multiPhylo(compare, method = refCompareMethod)), treename = as.character(names(multiPhyloTrees[b])))
             refDistTracker = rbind(refDistTracker, distance, stringsAsFactors = FALSE)
         }
-        for (i in clade_loop) {
+        for (i in cladeLoop) {
             # retrieve all genomes matching i as character
-            itaxa <- clade_list[which(clade_list$host == i), 1]
-            nottaxa <- clade_list[which(clade_list$host != i), 1]
+            itaxa <- cladeList[which(cladeList$host == i), 1]
+            nottaxa <- cladeList[which(cladeList$host != i), 1]
             for (a in itaxa) {
-                in_distancesa = idist[a, itaxa]
+                inDistancesA = idist[a, itaxa]
                 out_distancesa = idist[a, nottaxa]
-                in_tracker = c(in_tracker, in_distancesa)
-                out_tracker = c(out_tracker, out_distancesa)
-                clade_in = c(clade_in, in_distancesa)
+                inTracker = c(inTracker, inDistancesA)
+                outTracker = c(outTracker, out_distancesa)
+                clade_in = c(clade_in, inDistancesA)
                 clade_out = c(clade_out, out_distancesa)
             }
             if (is.null(keyClades == FALSE)) {
                 # if running keyclades routine... if this clade is a key clade
                 if (i %in% keyClades) {
-                  otherKeys <- clade_list[which(clade_list$host != j & clade_list$host %in% keyClades), 1]
+                  otherKeys <- cladeList[which(cladeList$host != j & cladeList$host %in% keyClades), 1]
                   for (a in itaxa) {
                     inKeyDists = mean(idist[a, itaxa])
                     outKeyDists = mean(idist[a, otherKeys])

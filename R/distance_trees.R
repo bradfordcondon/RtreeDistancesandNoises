@@ -2,25 +2,25 @@
 ####### calculate the average distance between groups given a distance matrix and a clade list 12-5-16
 
 
-within_group_distances <- function(distanceMatrix, clade_assignments, ID_names) {
-    clade_list = data.frame(ID_names, clade_assignments)
+within_group_distances <- function(distanceMatrix, cladeAssignments, ID_names) {
+    cladeList = data.frame(ID_names, cladeAssignments)
     idist = na.omit(reshape::melt(distanceMatrix))
     colnames(idist) <- c("a", "b", "dist")  #break matrix down into sets of pairwise distances between taxon a & b where dist = dist.
     allSelfDists = data.frame()
-    clade_loop <- unique(clade_assignments)
+    clade_loop <- unique(cladeAssignments)
     # loop through all clade self comparisons, add to DF
     for (i in clade_loop) {
         # retrieve all genomes matching i as character
-        itaxa <- as.character(clade_list[which(clade_list$clade_assignments == i), 1])  # this is highly problematic
+        itaxa <- as.character(cladeList[which(cladeList$cladeAssignments == i), 1])  # this is highly problematic
         if (length(itaxa > 1)) {
             for (a in itaxa) {
                 intaxa = itaxa[itaxa != a]  #remove variable from list
                 # retrieve values matching a
                 ataxa = idist[idist$a %in% a, ]
                 # calculate in-distances
-                in_distancesa = ataxa[ataxa$b %in% intaxa, 3]
-                if (length(in_distancesa > 0)) {
-                  toAdd = cbind(as.numeric(in_distancesa), as.character(i), a)
+                inDistancesA = ataxa[ataxa$b %in% intaxa, 3]
+                if (length(inDistancesA > 0)) {
+                  toAdd = cbind(as.numeric(inDistancesA), as.character(i), a)
                 }
                 allSelfDists = rbind(allSelfDists, toAdd)
             }
@@ -33,21 +33,21 @@ within_group_distances <- function(distanceMatrix, clade_assignments, ID_names) 
 
 ########
 
-generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtable, clade_assignments, ID_names) {
+generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtable, cladeAssignments, ID_names) {
 
-    clade_list = data.frame(ID_names, clade_assignments)
+    cladeList = data.frame(ID_names, cladeAssignments)
     bstrees = vector("list", 0)  #create blank object to put noised trees in
     class(bstrees) <- "multiPhylo"
     loop = c(1:numberOfTrees)  #number of trees and intervals to make
     for (i in loop) {
         x <- distanceMatrix  #reset matrix
-        for (a in as.character(clade_list$ID_names)) {
+        for (a in as.character(cladeList$ID_names)) {
             # lookup this clade
-            thisClade <- as.character(unlist(clade_list %>% filter(ID_names == as.character(a)) %>% select(clade_assignments)))
+            thisClade <- as.character(unlist(cladeList %>% filter(ID_names == as.character(a)) %>% select(cladeAssignments)))
             # determine SD to noise from
-            thisSD <- withinSDtable %>% filter(clade_assignments == thisClade) %>% select(sd)
+            thisSD <- withinSDtable %>% filter(cladeAssignments == thisClade) %>% select(sd)
             # get all taxa in this clade excluding itself
-            matchingTaxa <- as.list(clade_list %>% filter(clade_assignments == thisClade) %>% select(ID) %>% filter(ID != as.character(a)))
+            matchingTaxa <- as.list(cladeList %>% filter(cladeAssignments == thisClade) %>% select(ID) %>% filter(ID != as.character(a)))
 
             for (b in matchingTaxa$ID) {
                 sublista <- idist[which(idist$a == a), ]
