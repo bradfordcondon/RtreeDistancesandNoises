@@ -31,10 +31,10 @@ within_group_distances <- function(distanceMatrix, cladeAssignments, ID_names) {
     return(allSelfDists)
 }
 
-########
+######## 
 
 generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtable, cladeAssignments, ID_names) {
-
+    
     cladeList = data.frame(ID_names, cladeAssignments)
     bstrees = vector("list", 0)  #create blank object to put noised trees in
     class(bstrees) <- "multiPhylo"
@@ -48,7 +48,7 @@ generate_bootstrap_trees <- function(distanceMatrix, numberOfTrees, withinSDtabl
             thisSD <- withinSDtable %>% filter(cladeAssignments == thisClade) %>% select(sd)
             # get all taxa in this clade excluding itself
             matchingTaxa <- as.list(cladeList %>% filter(cladeAssignments == thisClade) %>% select(ID) %>% filter(ID != as.character(a)))
-
+            
             for (b in matchingTaxa$ID) {
                 sublista <- idist[which(idist$a == a), ]
                 sublist <- sublista[which((sublista$b) == b), ]  #retrieve the distance between these two strains
@@ -94,14 +94,15 @@ bootStrapWithNoiseFromNorm <- function(originalMatrix, standardDev, numTrees = 1
             treex = ape::multi2di(treex)
         }
         bstrees[[i]] <- treex
-        message = paste('finished with tree number' , i)
+        message = paste("finished with tree number", i)
         print(message)
     }
     return(bstrees)
 }
-####
+#### 
 
-## written 7-24-16 Goal: To take a range of SDs and a distance matrix as an input, noisea given number of rep trees, and to return the bootstrap values for each node in list form as an output
+## written 7-24-16 Goal: To take a range of SDs and a distance matrix as an input, noisea given number of rep trees, and to return the bootstrap values for each node in
+## list form as an output
 bootStrapWithNoiseOverRange <- function(originalMatrix, rangeMin = 1, rangeMax = 1000, numTrees = 1000, rootTree = NULL) {
     sdRange = c(rangeMin:rangeMax)  #range of SD to check
     loop = c(1:numTrees)  #number of trees and intervals to make
