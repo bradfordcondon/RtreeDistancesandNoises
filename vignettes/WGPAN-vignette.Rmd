@@ -24,6 +24,8 @@ library('knitr')
 library('reshape')
 library('dplyr')
 library('ape')
+library('devtools')
+devtools::load_all()
 ```
 
 
