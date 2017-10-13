@@ -54,9 +54,9 @@ generateBootstrapTrees <- function(distanceMatrix, numberOfTrees, withinSDtable,
             # lookup this clade
             thisClade <- as.character(unlist(cladeList %>% filter(ID_names == as.character(a)) %>% select(cladeAssignments)))
             # determine SD to noise from
-            thisSD <- withinSDtable %>% filter(cladeAssignments == thisClade) %>% select(sd)
+            thisSD <- withinSDtable %>% filter(clade == thisClade) %>% select(sd)
             # get all taxa in this clade excluding itself
-            matchingTaxa <- as.list(cladeList %>% filter(cladeAssignments == thisClade) %>% select(ID) %>% filter(ID != as.character(a)))
+            matchingTaxa <- as.list(cladeList %>% filter(cladeAssignments == thisClade) %>% select(ID_names) %>% filter(ID_names != as.character(a)))
 
             for (b in matchingTaxa$ID) {
                 sublista <- idist[which(idist$a == a), ]
@@ -68,7 +68,7 @@ generateBootstrapTrees <- function(distanceMatrix, numberOfTrees, withinSDtable,
             }
         }
         x <- abs(x)  #Convert negative to positive
-        treex <- nj(as.dist(x))
+        treex <- ape::nj(as.dist(x))
         treex$edge.length[treex$edge.length < 0] <- abs(treex$edge.length[treex$edge.length < 0])
         bstrees[[i]] <- treex
         message = paste("finished with tree number", i)

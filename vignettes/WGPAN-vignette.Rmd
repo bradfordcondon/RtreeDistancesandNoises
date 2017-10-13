@@ -23,6 +23,7 @@ library('WGPAN')
 library('knitr')
 library('reshape')
 library('dplyr')
+libary('ape')
 devtools::load_all()
 ```
 
@@ -76,15 +77,11 @@ Next, we want to noise the tree based on this distance file.
 ###
 #Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
 ###
-generateBootstrapTrees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
-
-##write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
+bstrees<- generateBootstrapTrees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
 
 ```
 
 Now that we have 1000 bootstrap trees, add them as bootstraps to original tree using prop.clades.
-
-Note we remove all labels that are below 50% bootstrap support.
 Note also that interclade distances *are not noised*.  As such we are only looking at nodes defining clades, not nodes defining relationships between clades.
 
 
@@ -95,17 +92,14 @@ numbers of bipartitions (or splits); if TRUE, the number of clades (of hopefully
 
 
 
-```{r, eval=FALSE}
-#read in bootstrap trees
-bstrees<- read.nexus(paste(outputFolder,"", sep = "bootstrapTreesV5__5-21-16.nexus"))
-master <- myDataTrim
+```{r}
+master <- myData
 main_tree <- nj(as.dist(master))
 clade_support <- prop.clades(main_tree, bstrees)  #generate BS values based on trees
 clade_support = clade_support/10
 clade_support[is.na(clade_support)]<- 0
-clade_support[clade_support < 50] <- ""
+clade_support
 main_tree$node.labels<- clade_support 
-plot(main_tree)
-write.nexus(main_tree, file = paste(outputFolder, "Tree_NormalNoiseWithinCladeBasedOnSD_V6_4-22-17.txt", sep=""))
+plot(main_tree, type="radial")
 ```
 
