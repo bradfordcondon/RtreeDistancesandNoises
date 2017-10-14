@@ -89,7 +89,7 @@ trimTreeFromList <- function(treeToTrim, listToDrop) {
 #' @export
 
 treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, refCompareMethod = "edgeset") {
-    cladeList <- read.table(file = cladeListFile, header = FALSE)
+    cladeList <- utils::read.table(file = cladeListFile, header = FALSE)
     colnames(cladeList) <- c("ID", "host", "cladenum")  #assumes 3 column clade list.  clade num isnt necesary
     cladeList$ID <- gsub(".*._v_", "", perl = TRUE, cladeList$ID)  #trim the ID names, assuming names are FARMAN style
     cladeList$ID <- gsub("_.*", "", perl = TRUE, cladeList$ID)
@@ -108,13 +108,13 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
     loop = as.list(c(1:length(multiPhyloTrees)))  #Set up tree loop
     for (b in loop) {
         itree = multiPhyloTrees[[b]]  #retrieve distance matrix for each tree
-        idist = cophenetic.phylo(itree)
+        idist = ape::cophenetic.phylo(itree)
         inTracker = character()  #reset trackers for this individual tree
         outTracker = character()
         cladeMeans = data.frame()
         if (is.null(referenceTree) == FALSE) {
             compare[[2]] <- itree  #put this tree in our comparison slot
-            distance = c(distance = as.character(dist.multiPhylo(compare, method = refCompareMethod)), treename = as.character(names(multiPhyloTrees[b])))
+            distance = c(distance = as.character(ape::dist.multiPhylo(compare, method = refCompareMethod)), treename = as.character(names(multiPhyloTrees[b])))
             refDistTracker = rbind(refDistTracker, distance, stringsAsFactors = FALSE)
         }
         for (i in cladeLoop) {

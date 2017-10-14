@@ -14,7 +14,8 @@ Imports:
   phytools,
   distory,
   reshape,
-  stats
+  stats,
+  utils
 Suggests:
   knitr,
   rmarkdown
