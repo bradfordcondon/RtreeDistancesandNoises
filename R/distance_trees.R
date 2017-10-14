@@ -7,7 +7,7 @@
 
 withinGroupDistances <- function(distanceMatrix, cladeAssignments, ID_names) {
     cladeList = data.frame(ID_names, cladeAssignments)
-    idist = na.omit(reshape::melt(distanceMatrix))
+    idist = stats::na.omit(reshape::melt(distanceMatrix))
     colnames(idist) <- c("a", "b", "dist")  #break matrix down into sets of pairwise distances between taxon a & b where dist = dist.
     allSelfDists = data.frame()
     clade_loop <- unique(cladeAssignments)
@@ -41,6 +41,7 @@ withinGroupDistances <- function(distanceMatrix, cladeAssignments, ID_names) {
 #' @param withinSDtable The within clade SD table.
 #' @param cladeAssignments Ordered list of clade assignments for taxa.
 #' @param ID_names List of taxa names corresponding to the clade assignments.
+#' @export
 #'
 generateBootstrapTrees <- function(distanceMatrix, numberOfTrees = 1000, withinSDtable, cladeAssignments, ID_names) {
 
@@ -62,13 +63,13 @@ generateBootstrapTrees <- function(distanceMatrix, numberOfTrees = 1000, withinS
                 sublista <- idist[which(idist$a == a), ]
                 sublist <- sublista[which((sublista$b) == b), ]  #retrieve the distance between these two strains
                 thisDist = as.numeric(sublist[, 3])
-                newVal = (thisDist + rnorm(1, mean = 0, sd = as.numeric(thisSD)))  #randomly sample 1 value from rnorm of this SD
+                newVal = (thisDist + stats::rnorm(1, mean = 0, sd = as.numeric(thisSD)))  #randomly sample 1 value from rnorm of this SD
                 x[b, a] <- newVal
                 x[a, b] <- newVal
             }
         }
         x <- abs(x)  #Convert negative to positive
-        treex <- ape::nj(as.dist(x))
+        treex <- ape::nj(stats::as.dist(x))
         treex$edge.length[treex$edge.length < 0] <- abs(treex$edge.length[treex$edge.length < 0])
         bstrees[[i]] <- treex
         message = paste("finished with tree number", i)

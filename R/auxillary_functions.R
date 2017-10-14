@@ -6,6 +6,7 @@
 #'
 #' @return Output is a multiPhylo object.
 #'
+#' @export
 #'
 
 readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot = NULL) {
@@ -42,7 +43,7 @@ readAndCombineTrees <- function(pathToTrees, taxaToExclude = NULL, taxonToRoot =
 #' @param limitingTree The source tree that will determine which tips are dropped.
 #'
 #' @return Output is the trimmed tree of treeToTrim.
-#'
+#' @export
 #'
 
 trimTreeToTree <- function(treeToTrim, limitingTree) {
@@ -62,7 +63,7 @@ trimTreeToTree <- function(treeToTrim, limitingTree) {
 #' @param listToDrop A list of tips to drop.
 #'
 #' @return Output is the trimmed tree of treeToTrim.
-#'
+#' @export
 #'
 
 trimTreeFromList <- function(treeToTrim, listToDrop) {
@@ -70,7 +71,7 @@ trimTreeFromList <- function(treeToTrim, listToDrop) {
     limTips <- listToDrop
     tipsToDrop <- unTrimTips[!unTrimTips %in% limTips]
     for (i in tipsToDrop) {
-        treeToTrim = drop.tip(treeToTrim, c(i, trim.internal = TRUE))  #delete tips as needed
+        treeToTrim = ape::drop.tip(treeToTrim, c(i, trim.internal = TRUE))  #delete tips as needed
     }
     finalTree <- treeToTrim
     return(finalTree)
@@ -85,6 +86,7 @@ trimTreeFromList <- function(treeToTrim, listToDrop) {
 #' @param cladeListFile The file.
 #' @param referenceTree A reference tree.
 #' @param refCompareMethod The method to use for dist.multiPhylo.
+#' @export
 
 treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", referenceTree = NULL, refCompareMethod = "edgeset") {
     cladeList <- read.table(file = cladeListFile, header = FALSE)
@@ -153,6 +155,7 @@ treesToCladeCompare <- function(multiPhyloTrees, cladeListFile = "list.txt", ref
 
 #' Determines which tips are missing from trees, and how often.
 #' @param multiPhyloObject The tree object.
+#' @export
 
 analyzeTips <- function(multiPhyloObject) {
     tipSumCounter <- data_frame()

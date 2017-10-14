@@ -24,7 +24,7 @@ library('knitr')
 library('reshape')
 library('dplyr')
 library('ape')
-library('devtools')
+require('devtools')
 devtools::load_all()
 ```
 
@@ -74,11 +74,11 @@ withinSDtable[is.na(withinSDtable)]<- 0
 
 Next, we want to noise the tree based on this distance file.
 
-```{r, noiseTree}
+```{r, noiseTree, echo=FALSE, message=FALSE}
 ###
-#Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
+#Write 100 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
 ###
-bstrees<- generateBootstrapTrees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
+bstrees<- generateBootstrapTrees(distanceMatrix = x, numberOfTrees = 100, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
 
 ```
 
@@ -97,7 +97,7 @@ numbers of bipartitions (or splits); if TRUE, the number of clades (of hopefully
 master <- myData
 main_tree <- nj(as.dist(master))
 clade_support <- prop.clades(main_tree, bstrees)  #generate BS values based on trees
-clade_support = clade_support/10
+#clade_support = clade_support/10   Divide by 10 for 1,000 bootstrap trees
 clade_support[is.na(clade_support)]<- 0
 clade_support
 main_tree$node.labels<- clade_support 
