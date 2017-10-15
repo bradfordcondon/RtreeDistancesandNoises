@@ -2,22 +2,22 @@
 % Please edit documentation in R/distance_trees.R
 \name{generateBootstrapTrees}
 \alias{generateBootstrapTrees}
-\title{Bootstraps}
+\title{Generates bootstraps trees based on within-group standard deviation.}
 \usage{
-generateBootstrapTrees(distanceMatrix, numberOfTrees, withinSDtable,
+generateBootstrapTrees(distanceMatrix, numberOfTrees = 1000, withinSDtable,
   cladeAssignments, ID_names)
 }
 \arguments{
-\item{distanceMatrix}{hk}
+\item{distanceMatrix}{A pairwise distance matrix.}
 
-\item{numberOfTrees}{hkj}
+\item{numberOfTrees}{The number of bootstrap trees to generate. Default: 1000}
 
-\item{withinSDtable}{hkj}
+\item{withinSDtable}{The within clade SD table.}
 
-\item{cladeAssignments}{hkj}
+\item{cladeAssignments}{Ordered list of clade assignments for taxa.}
 
-\item{ID_names}{hkj}
+\item{ID_names}{List of taxa names corresponding to the clade assignments.}
 }
 \description{
-Bootstraps
+Generates bootstraps trees based on within-group standard deviation.
 }
