@@ -1,28 +1,21 @@
+
+[![Travis-CI Build Status](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises.svg?branch=master)](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises)
+
 # WGPAN Whole-Genome Pairwise Alignment Noising
-written by Bradford Condon
+written by Bradford Condon, under advisement of Mark Farman
 University of Kentucky
+
 
 Special thanks to Hadley Wickham for writing [a fantastsic guide to distributing R packages](http://r-pkgs.had.co.nz/intro.html).
 
 Note: this module is currently under development, converting it from scripts to a simple standalone package.   This package uses`formatR::tidy_dir("R")` to format code. Apologies about the inconsistent camel_case and snakeCase usaage, I was but a fledgeling programmer.
 
 
-## Build Status
-
-[![Travis-CI Build Status](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises.svg?branch=master)](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises)
-
 ## Introduction
 
-WGPAN (Whole-Genome Pairwise Alignment Noising).
+The WGPAN (Whole-Genome Pairwise Alignment Noising) package was designed to deal with neighbor-joining trees built from whole-genome pairwise alignment.  Traditional bootstrapping methods are invalid, because there is not a single alignment of all genomes to sample with replacement from.  As such, a new method for assigning confidence to nodes in a tree was required.  WGPAN allows you to assign confidence values to nodes that are relevant for **within clade confidence only**.  You can therefore test hypotheses regarding user-defined clades, **not** the relationship among those clades.
 
-```{r}
-library('knitr')
-library('dplyr')
-library('reshape')
-source('../R/AuxFunctions.R')
-source('../R/distance_trees.R')
-
-```
+In addition, I've included some general utilities to make life a little easier when manipulating trees with the excellent package `APE`.  The vignette and documentation is forthcoming for these methods. 
 
 # Installation
 
@@ -33,95 +26,6 @@ install_github("bradfordcondon/WGPAN")
 ```
 This package is not yet accepted in CRAN or BioConductor.  Once it is, instructions on installing it this way will be made available.
 
+#### Vignettes
 
-# Running the package
-
-
-## Loading data
-
-Note that the matrix **MUST** be identical across the diagonal for the distance calculation to work.
-
-```{r readInData}
-ID <- c("Amanita","Polyporus","Coprinus", "Daldinia", "Entoloma", "Flaviporus")
-myData<- matrix(sample(100:10000, 36), nrow = 6, ncol = 6,  dimnames = list(ID, ID)) 
-diag(myData)<- 0 #set diagonal to 0
-
-```
-
-## import clade list
-```{r cladeList}
-
-clades = c("Agaricales", "Polyporales", "Agaricales", "Xylariales", "Agaricales", "Polyporales")
-cladeList = data.frame(ID, clades)
-kable(cladeList)
-```
-
-##Generate within-clade distance table
-Calculate the distances between all within-clade comparisons.  Make a boxplot of this, then make a summary table with the SD and mean.
-
-```{r, withinCladeDistances}
-x<- myData
-idist = na.omit(melt(x))
-colnames(idist) <- c("a", "b", "dist")
-allSelfDists = data.frame()
-clade_loop <- unique(cladeList$clades)
-
-#remove items from cladeList not in tree
-  cladeList<- filter(cladeList, ID %in% row.names(myData))
-  
-ID_names <- cladeList$ID
-cladeAssignments <-cladeList$clades
-
-WithinDistanceTable <- withinGroupDistancesThree(distanceMatrix = x, cladeAssignments = cladeAssignments, ID_names = ID_names)
-
-boxplot(distance ~ clade, data = WithinDistanceTable, las=3 , main = "within-clade distances 1-11-17", ylab = "SNPs/MB" )
-withinSDtable<- WithinDistanceTable %>% group_by(clade)%>%summarize(sd = sd(distance), mean = mean(distance))
-
-kable(withinSDtable)
-#replace NA with 0
-withinSDtable[is.na(withinSDtable)]<- 0
-
-```
-
-
-## Noise tree
-
-Next, we want to noise the tree based on this distance file.
-
-```{r, noiseTree, eval=FALSE}
-###
-#Write 1,000 bootstrap trees, where within-clade distances (only!) are noised by the normal distribution with SD= that clade's within SD.
-###
-generateBootstrapTrees(distanceMatrix = x, numberOfTrees = 1000, withinSDtable= withinSDtable, cladeAssignments = cladeAssignments, ID_names = ID_names)
-
-##write.nexus(bstrees, file = paste(outputFolder, "bootstrapTreesV5__5-21-16.nexus", sep=""))
-
-```
-
-Now that we have 1000 bootstrap trees, add them as bootstraps to the original tree using prop.clades.
-
-Note we remove all labels that are below 50% bootstrap support.
-Note also that interclade distances *are not noised*.  As such we are only looking at nodes defining clades, not nodes defining relationships between clades.
-
-
-On the performance of prop.clades:
-
->Since ape 3.5, prop.clades should return sensible results for all values of rooted: if FALSE, the
-numbers of bipartitions (or splits); if TRUE, the number of clades (of hopefully rooted trees).
-
-
-
-```{r, eval=FALSE}
-#read in bootstrap trees
-bstrees<- read.nexus(paste(outputFolder,"", sep = "bootstrapTreesV5__5-21-16.nexus"))
-master <- myDataTrim
-main_tree <- nj(as.dist(master))
-clade_support <- prop.clades(main_tree, bstrees)  #generate BS values based on trees
-clade_support = clade_support/10
-clade_support[is.na(clade_support)]<- 0
-clade_support[clade_support < 50] <- ""
-main_tree$node.labels<- clade_support 
-plot(main_tree)
-write.nexus(main_tree, file = paste(outputFolder, "Tree_NormalNoiseWithinCladeBasedOnSD_V6_4-22-17.txt", sep=""))
-```
-
+For example usage of the bootstrapping methods, please see the [vignette](https://github.com/bradfordcondon/WGPAN/blob/master/vignettes/WGPAN-vignette.Rmd)
