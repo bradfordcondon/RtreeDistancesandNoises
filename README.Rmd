@@ -1,5 +1,5 @@
 
-[![Travis-CI Build Status](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises.svg?branch=master)](https://travis-ci.org/bradfordcondon/RtreeDistancesandNoises)
+[![Travis-CI Build Status](https://travis-ci.org/bradfordcondon/WGPAN.svg?branch=master)](https://travis-ci.org/bradfordcondon/WGPAN)
 
 # WGPAN Whole-Genome Pairwise Alignment Noising
 written by Bradford Condon, under advisement of Mark Farman
