@@ -1,5 +1,6 @@
 
 [![Travis-CI Build Status](https://travis-ci.org/bradfordcondon/WGPAN.svg?branch=master)](https://travis-ci.org/bradfordcondon/WGPAN)
+[![DOI](https://zenodo.org/badge/64423500.svg)](https://zenodo.org/badge/latestdoi/64423500)
 
 # WGPAN Whole-Genome Pairwise Alignment Noising
 written by Bradford Condon, under advisement of Mark Farman
