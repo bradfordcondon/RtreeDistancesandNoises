@@ -1,4 +1,6 @@
 library("ape")
+library('dplyr')
+
 test_that("Tips dropped from reference tree", {
 start_length <- 10
   x <- rmtree(2, start_length)

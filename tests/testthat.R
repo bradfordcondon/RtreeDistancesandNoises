@@ -1,5 +1,6 @@
 library(testthat)
 library(WGPAN)
+library('dplyr')
 
 test_check("WGPAN")
 
