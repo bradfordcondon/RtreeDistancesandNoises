@@ -15,10 +15,9 @@ Imports:
   distory,
   reshape,
   stats,
-  utils,
-  testthat
+  utils
 Suggests:
   knitr,
   rmarkdown,
-    testthat
+  testthat
 VignetteBuilder: knitr
