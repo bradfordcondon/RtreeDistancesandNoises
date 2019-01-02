@@ -8,8 +8,7 @@ University of Kentucky
 
 
 Special thanks to Hadley Wickham for writing [a fantastsic guide to distributing R packages](http://r-pkgs.had.co.nz/intro.html).
-
-Note: this module is currently under development, converting it from scripts to a simple standalone package.   This package uses`formatR::tidy_dir("R")` to format code. Apologies about the inconsistent camel_case and snakeCase usaage, I was but a fledgeling programmer.
+This package uses`formatR::tidy_dir("R")` to format code. Apologies about the inconsistent camel_case and snakeCase usaage, I was but a fledgeling programmer.
 
 
 ## Introduction
