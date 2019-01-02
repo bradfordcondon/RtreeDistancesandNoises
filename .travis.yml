@@ -5,6 +5,5 @@ sudo: false
 cache: packages
 r_packages:
  - ggplot2
- - devtools
  - knitr
  - roxygen2
