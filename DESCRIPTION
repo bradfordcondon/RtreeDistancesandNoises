@@ -15,7 +15,8 @@ Imports:
   distory,
   reshape,
   stats,
-  utils
+  utils,
+  testthat
 Suggests:
   knitr,
   rmarkdown,

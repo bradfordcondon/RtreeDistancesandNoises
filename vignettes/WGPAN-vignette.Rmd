@@ -16,16 +16,14 @@ knitr::opts_chunk$set(include = TRUE)
 
 WGPAN (Whole-Genome Pairwise Alignment Noising).
 
-Apologies about the inconsistent camel_case and snakeCase usage, I was but a fledgling programmer.
-
 ```{r}
-library('knitr')
-library('reshape')
-library('dplyr')
-library('ape')
+#library('knitr')
+#library('reshape')
+#library('dplyr')
+#library('ape')
 require('devtools')
-devtools::load_all()
 install_github('bradfordcondon/WGPAN')
+devtools::load_all()
 ```
 
 
