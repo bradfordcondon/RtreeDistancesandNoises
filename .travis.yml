@@ -3,6 +3,9 @@
 language: R
 sudo: false
 cache: packages
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libmagick++-dev
 r_packages:
  - ggplot2
  - knitr
