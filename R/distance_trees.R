@@ -29,7 +29,7 @@ withinGroupDistances <- function(distanceMatrix, cladeAssignments, ID_names) {
             }
         }
     }
-    colnames(allSelfDists) <- c("distance", "clade")
+    colnames(allSelfDists) <- c("distance", "clade", "ID")
     allSelfDists$distance <- as.numeric(as.character(allSelfDists$distance))
     return(allSelfDists)
 }
