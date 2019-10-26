@@ -24,7 +24,7 @@ In addition, I've included some general utilities to make life a little easier w
 library(devtools)
 install_github("bradfordcondon/WGPAN")
 ```
-This package is not yet accepted in CRAN or BioConductor.  Once it is, instructions on installing it this way will be made available.
+This package is only available via github.  If you are interested in maintaining this package i would happily hand over control.
 
 #### Vignettes
 
